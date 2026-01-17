@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChemFormula® | أداة متقدمة لصياغة التركيبات الكيميائية</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <h1>كيمفورمولا®</h1>
+  <h2>أداة متقدمة لصياغة التركيبات الكيميائية</h2>
+
+  <form id="formulationForm">
+
+    <!-- Step 1 -->
+    <div class="step">
+      <label for="activeName">1. اسم المادة الفعالة</label>
+      <input type="text" id="activeName" name="activeName" placeholder="ادخل اسم المادة الفعالة" required />
+      <label for="activeConcentration">تركيز المادة الفعالة (ملجم)</label>
+      <input type="number" id="activeConcentration" name="activeConcentration" placeholder="مثلاً 250" min="0" step="any" required />
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step">
+      <label>2. نوع الدستور المرجع</label>
+      <div class="inline-radio-group">
+        <label><input type="radio" name="standardType" value="BP" required /> BP</label>
+        <label><input type="radio" name="standardType" value="USP" /> USP</label>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step">
+      <label>3. الشكل المطلوب</label>
+      <select id="dosageForm" name="dosageForm" required>
+        <option value="" disabled selected>اختر الشكل</option>
+        <option value="tablet">قرص</option>
+        <option value="liquid">شراب سائل</option>
+        <option value="powder">بودرة جافة</option>
+      </select>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step">
+      <label>4. أساس إنشاء التركيبة</label>
+      <select id="formulationBasis" name="formulationBasis" required>
+        <option value="" disabled selected>اختر الأساس</option>
+        <option value="balance">توازن الجودة والتكلفة</option>
+        <option value="quality">الجودة فقط</option>
+        <option value="cost">التكلفة فقط</option>
+      </select>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="step">
+      <label>5. طريقة تحرر المادة الفعالة</label>
+      <select id="releaseMechanism" name="releaseMechanism" required>
+        <option value="" disabled selected>اختر الطريقة</option>
+        <option value="immediate">تحرر مباشر</option>
+        <option value="sustained">تحرر مطوّل</option>
+        <option value="delayed">تحرر متأخر</option>
+      </select>
+    </div>
+
+    <!-- Step 6 -->
+    <div class="step">
+      <label>6. اختيار أسماء المواد المضافة</label>
+      <div class="inline-radio-group">
+        <label><input type="radio" name="excipientMode" value="manual" required /> يدويًا</label>
+        <label><input type="radio" name="excipientMode" value="auto" /> آليًا</label>
+      </div>
+    </div>
+
+    <!-- Step 7 -->
+    <div class="step" id="excipientNamesSection" style="display:none;">
+      <label>7. تحديد أسماء المواد المضافة</label>
+      <div id="excipientContainer">
+        <div class="excipient-row">
+          <input type="text" name="excipientName" placeholder="اسم المادة المضافة" required />
+          <input type="number" name="excipientWeight" placeholder="الكمية (بالملجم)" min="0" step="any" required />
+          <button type="button" class="removeExcipientBtn">حذف</button>
+        </div>
+      </div>
+      <button type="button" id="addExcipientBtn">إضافة مادة مضافة</button>
+    </div>
+
+    <button type="submit">احسب التركيبة المثالية</button>
+  </form>
+
+  <!-- Results -->
+  <section id="results" style="display:none;">
+    <h2>النتائج</h2>
+    <table id="resultsTable">
+      <thead>
+        <tr>
+          <th>اسم المادة</th>
+          <th>الكمية (ملجم)</th>
+          <th>النسبة المئوية (%)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div id="chartContainer">
+      <canvas id="formulationChart"></canvas>
+    </div>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>

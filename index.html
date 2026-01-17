@@ -1,261 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChemFormula - Smart Chemical Formula Tool</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ChemFormula® | Global Chemical Formulation Tool</title>
+
+  <!-- Meta (Professional / Legal-ready) -->
+  <meta name="description" content="ChemFormula® is a professional chemical formulation optimizer ensuring 100% accuracy, manual active ingredient control, auto or manual batch weight, multilingual support, and visual analytics."/>
+  <meta name="author" content="ChemFormula®"/>
+  <meta name="robots" content="index, follow"/>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css"/>
+
+  <!-- Chart.js (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* Fallback minimal styling if style.css not loaded */
+    body{font-family:Arial,Helvetica,sans-serif;background:#f6f8fb;margin:0;color:#1f2937}
+    header{background:#0f172a;color:#fff;padding:16px}
+    header h1{margin:0;font-size:20px}
+    main{padding:20px;max-width:1100px;margin:auto}
+    .card{background:#fff;border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 10px 25px rgba(0,0,0,.06)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+    label{font-weight:600;font-size:14px}
+    input,select,button{width:100%;padding:10px;border-radius:8px;border:1px solid #d1d5db;margin-top:6px}
+    button{background:#2563eb;color:#fff;border:none;font-weight:700;cursor:pointer}
+    button.secondary{background:#64748b}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{border:1px solid #e5e7eb;padding:8px;text-align:center}
+    th{background:#f1f5f9}
+    footer{padding:16px;text-align:center;color:#64748b}
+    .lang{float:right}
+    .badge{display:inline-block;background:#e5f0ff;color:#1d4ed8;padding:4px 8px;border-radius:999px;font-size:12px}
+    .error{color:#b91c1c;font-weight:700}
+    .ok{color:#047857;font-weight:700}
+  </style>
 </head>
+
 <body>
-    <!-- Navigation Bar -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <i class="fas fa-flask"></i>
-                <h1>ChemFormula</h1>
-            </div>
-            <ul class="nav-menu">
-                <li><a href="#home"><i class="fas fa-home"></i> Home</a></li>
-                <li><a href="#tools"><i class="fas fa-tools"></i> Tools</a></li>
-                <li><a href="#about"><i class="fas fa-info-circle"></i> About</a></li>
-            </ul>
-        </div>
-    </nav>
+<header>
+  <h1>ChemFormula® <span class="badge">Global Edition</span></h1>
+  <select id="langSelect" class="lang">
+    <option value="en">English</option>
+    <option value="ar">العربية</option>
+  </select>
+</header>
 
-    <!-- Hero Section -->
-    <section class="hero" id="home">
-        <div class="hero-content">
-            <h2><i class="fas fa-atom"></i> Smart Chemical Formula Analyzer</h2>
-            <p class="subtitle">Advanced chemical formula analysis, validation, and conversion tool</p>
-            
-            <!-- Main Input Box -->
-            <div class="input-container">
-                <div class="input-group">
-                    <label for="chemical-input"><i class="fas fa-pencil-alt"></i> Enter Chemical Formula or Name:</label>
-                    <div class="input-with-button">
-                        <input type="text" id="chemical-input" 
-                               placeholder="Example: H₂O, NaCl, Sulfuric Acid" 
-                               autocomplete="off">
-                        <button id="analyze-btn" class="primary-btn">
-                            <i class="fas fa-search"></i> Analyze
-                        </button>
-                    </div>
-                    <div class="examples">
-                        <span>Try:</span>
-                        <button class="example-btn" data-formula="H2O">H₂O (Water)</button>
-                        <button class="example-btn" data-formula="NaCl">NaCl (Table Salt)</button>
-                        <button class="example-btn" data-formula="C6H12O6">C₆H₁₂O₆ (Glucose)</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+<main>
 
-    <!-- Analysis Results -->
-    <section class="results-section" id="results" style="display: none;">
-        <div class="container">
-            <h2><i class="fas fa-chart-bar"></i> Analysis Results</h2>
-            
-            <div class="results-grid">
-                <!-- Basic Information -->
-                <div class="result-card main-info">
-                    <h3><i class="fas fa-info-circle"></i> Formula Information</h3>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">Input Formula:</span>
-                            <span id="input-display" class="info-value formula-display"></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Corrected Formula:</span>
-                            <span id="corrected-formula" class="info-value formula-display correct"></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Chemical Name:</span>
-                            <span id="chemical-name" class="info-value"></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">State:</span>
-                            <span id="chemical-state" class="info-value"></span>
-                        </div>
-                    </div>
-                </div>
+  <!-- Unit Weight -->
+  <div class="card">
+    <h2 data-i18n="unitTitle">Unit Weight</h2>
+    <div class="grid">
+      <div>
+        <label data-i18n="weightMode">Weight Input Mode</label>
+        <select id="weightMode">
+          <option value="manual" data-i18n="manual">Manual (Manufacturer)</option>
+          <option value="auto" data-i18n="auto">Auto (Calculated)</option>
+        </select>
+      </div>
+      <div>
+        <label data-i18n="unitWeight">Total Unit Weight (kg)</label>
+        <input id="unitWeight" type="number" min="0" step="0.01" value="100"/>
+      </div>
+    </div>
+  </div>
 
-                <!-- Chemical Calculations -->
-                <div class="result-card calculations">
-                    <h3><i class="fas fa-calculator"></i> Chemical Calculations</h3>
-                    <div class="calc-grid">
-                        <div class="calc-item">
-                            <div class="calc-label">Molar Mass</div>
-                            <div id="molar-mass" class="calc-value">0.00</div>
-                            <div class="calc-unit">g/mol</div>
-                        </div>
-                        <div class="calc-item">
-                            <div class="calc-label">Mass Percent</div>
-                            <div id="mass-percent" class="calc-value">0</div>
-                            <div class="calc-unit">%</div>
-                        </div>
-                        <div class="calc-item">
-                            <div class="calc-label">Atom Count</div>
-                            <div id="atom-count" class="calc-value">0</div>
-                            <div class="calc-unit">Atoms</div>
-                        </div>
-                        <div class="calc-item">
-                            <div class="calc-label">Element Count</div>
-                            <div id="element-count" class="calc-value">0</div>
-                            <div class="calc-unit">Elements</div>
-                        </div>
-                    </div>
-                </div>
+  <!-- Active Ingredient (Manual Only) -->
+  <div class="card">
+    <h2 data-i18n="activeTitle">Active Ingredient (Manual)</h2>
+    <div class="grid">
+      <div>
+        <label data-i18n="activeName">Active Ingredient Name</label>
+        <input id="activeName" placeholder="e.g. Sodium Chloride"/>
+      </div>
+      <div>
+        <label data-i18n="activeWeight">Active Ingredient Weight (%)</label>
+        <input id="activeWeight" type="number" min="0" step="0.01"/>
+      </div>
+    </div>
+    <p class="badge" data-i18n="manualOnly">Active ingredient is manual input only.</p>
+  </div>
 
-                <!-- Element Analysis -->
-                <div class="result-card element-analysis">
-                    <h3><i class="fas fa-table"></i> Element Analysis</h3>
-                    <div class="table-container">
-                        <table id="elements-table">
-                            <thead>
-                                <tr>
-                                    <th>Element</th>
-                                    <th>Symbol</th>
-                                    <th>Count</th>
-                                    <th>Atomic Mass</th>
-                                    <th>Percent %</th>
-                                </tr>
-                            </thead>
-                            <tbody id="elements-tbody">
-                                <!-- Will be filled with data -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Additional Tools -->
-    <section class="tools-section" id="tools">
-        <div class="container">
-            <h2><i class="fas fa-tools"></i> Chemical Tools</h2>
-            <div class="tools-grid">
-                
-                <!-- Formula Converter -->
-                <div class="tool-card">
-                    <div class="tool-icon">
-                        <i class="fas fa-exchange-alt"></i>
-                    </div>
-                    <h3>Formula Converter</h3>
-                    <p>Convert between chemical formula and name</p>
-                    <div class="tool-inputs">
-                        <input type="text" id="convert-input" placeholder="Enter formula or name">
-                        <button id="convert-btn" class="secondary-btn">
-                            <i class="fas fa-sync-alt"></i> Convert
-                        </button>
-                    </div>
-                    <div id="convert-result" class="tool-result"></div>
-                </div>
-
-                <!-- Formula Validator -->
-                <div class="tool-card">
-                    <div class="tool-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <h3>Formula Validator</h3>
-                    <p>Validate chemical formula correctness</p>
-                    <div class="tool-inputs">
-                        <input type="text" id="validate-input" placeholder="Enter chemical formula">
-                        <button id="validate-btn" class="secondary-btn">
-                            <i class="fas fa-check"></i> Validate
-                        </button>
-                    </div>
-                    <div id="validate-result" class="tool-result"></div>
-                </div>
-
-                <!-- Mole Calculator -->
-                <div class="tool-card">
-                    <div class="tool-icon">
-                        <i class="fas fa-balance-scale"></i>
-                    </div>
-                    <h3>Mole Calculator</h3>
-                    <p>Convert between mass and moles</p>
-                    <div class="tool-inputs">
-                        <input type="text" id="moles-input" placeholder="Enter formula">
-                        <input type="number" id="mass-input" placeholder="Mass (grams)" step="0.01">
-                        <button id="calculate-btn" class="secondary-btn">
-                            <i class="fas fa-calculator"></i> Calculate
-                        </button>
-                    </div>
-                    <div id="moles-result" class="tool-result"></div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section class="about-section" id="about">
-        <div class="container">
-            <h2><i class="fas fa-info-circle"></i> About ChemFormula</h2>
-            <div class="about-content">
-                <div class="about-text">
-                    <p>ChemFormula is a comprehensive tool for analyzing and processing chemical formulas. Designed to help students, researchers, and chemistry enthusiasts understand and analyze chemical compounds with accuracy and ease.</p>
-                    
-                    <h3><i class="fas fa-star"></i> Features:</h3>
-                    <ul class="features-list">
-                        <li><i class="fas fa-check"></i> Accurate chemical formula analysis</li>
-                        <li><i class="fas fa-check"></i> Molar mass and percentage calculations</li>
-                        <li><i class="fas fa-check"></i> Database of common compounds</li>
-                        <li><i class="fas fa-check"></i> User-friendly interface</li>
-                        <li><i class="fas fa-check"></i> Instant and accurate results</li>
-                    </ul>
-                </div>
-                
-                <div class="about-stats">
-                    <div class="stat-item">
-                        <div class="stat-number" id="compounds-count">150+</div>
-                        <div class="stat-label">Chemical Compounds</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="elements-count">118</div>
-                        <div class="stat-label">Elements in Database</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="calculations-count">5</div>
-                        <div class="stat-label">Calculation Types</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <i class="fas fa-flask"></i>
-                    <span>ChemFormula</span>
-                </div>
-                <p>Comprehensive Chemical Formula Tool © 2023</p>
-                <div class="footer-links">
-                    <a href="#"><i class="fab fa-github"></i> GitHub</a>
-                    <a href="#"><i class="fas fa-envelope"></i> Contact</a>
-                    <a href="#"><i class="fas fa-question-circle"></i> Help</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Subscription Modal (Example) -->
-    <div class="modal" id="subscribe-modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h3><i class="fas fa-envelope"></i> Subscribe to Newsletter</h3>
-            <p>Get the latest updates and new chemical tools</p>
-            <input type="email" id="subscribe-email" placeholder="Your email">
-            <button id="subscribe-btn" class="primary-btn">Subscribe</button>
-        </div>
+  <!-- Components -->
+  <div class="card">
+    <h2 data-i18n="components">Other Components</h2>
+    <div class="grid">
+      <input id="compName" placeholder="Component name"/>
+      <input id="compPct" type="number" min="0" step="0.01" placeholder="%"/>
+      <button onclick="addComponent()" data-i18n="add">Add</button>
     </div>
 
-    <script src="script.js"></script>
+    <table>
+      <thead>
+        <tr>
+          <th data-i18n="name">Name</th>
+          <th data-i18n="percentage">%</th>
+          <th data-i18n="remove">Remove</th>
+        </tr>
+      </thead>
+      <tbody id="componentsBody"></tbody>
+    </table>
+
+    <p id="sumStatus" class="error"></p>
+  </div>
+
+  <!-- Chart -->
+  <div class="card">
+    <h2 data-i18n="chart">Composition Chart</h2>
+    <canvas id="pieChart" height="140"></canvas>
+  </div>
+
+</main>
+
+<footer>
+  © 2026 ChemFormula® — All rights reserved. | <a href="legal/">Legal</a>
+</footer>
+
+<script>
+/* ===================== i18n ===================== */
+const i18n = {
+  en:{
+    unitTitle:"Unit Weight",
+    weightMode:"Weight Input Mode",
+    manual:"Manual (Manufacturer)",
+    auto:"Auto (Calculated)",
+    unitWeight:"Total Unit Weight (kg)",
+    activeTitle:"Active Ingredient (Manual)",
+    activeName:"Active Ingredient Name",
+    activeWeight:"Active Ingredient Weight (%)",
+    manualOnly:"Active ingredient is manual input only.",
+    components:"Other Components",
+    add:"Add",
+    name:"Name",
+    percentage:"Percentage",
+    remove:"Remove",
+    chart:"Composition Chart"
+  },
+  ar:{
+    unitTitle:"وزن الوحدة",
+    weightMode:"طريقة إدخال الوزن",
+    manual:"يدوي (الشركة المصنعة)",
+    auto:"تلقائي (محسوب)",
+    unitWeight:"الوزن الكلي للوحدة (كجم)",
+    activeTitle:"المادة الفعالة (يدوي)",
+    activeName:"اسم المادة الفعالة",
+    activeWeight:"وزن المادة الفعالة (%)",
+    manualOnly:"إدخال المادة الفعالة يدوي فقط.",
+    components:"المكونات الأخرى",
+    add:"إضافة",
+    name:"الاسم",
+    percentage:"النسبة %",
+    remove:"حذف",
+    chart:"الرسم البياني للتركيب"
+  }
+};
+
+const langSelect=document.getElementById('langSelect');
+langSelect.onchange=()=>applyLang(langSelect.value);
+function applyLang(l){
+  document.documentElement.lang=l;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');
+    if(i18n[l][k]) el.textContent=i18n[l][k];
+  });
+}
+applyLang('en');
+
+/* ===================== Logic ===================== */
+let components=[];
+const tbody=document.getElementById('componentsBody');
+const sumStatus=document.getElementById('sumStatus');
+let chart;
+
+function addComponent(){
+  const n=document.getElementById('compName').value.trim();
+  const p=parseFloat(document.getElementById('compPct').value);
+  if(!n || isNaN(p)) return;
+  components.push({n,p});
+  render();
+}
+
+function removeComponent(i){
+  components.splice(i,1);
+  render();
+}
+
+function render(){
+  tbody.innerHTML='';
+  let sum=0;
+
+  const activeName=document.getElementById('activeName').value.trim();
+  const activePct=parseFloat(document.getElementById('activeWeight').value)||0;
+  if(activeName && activePct>0){
+    sum+=activePct;
+  }
+
+  components.forEach((c,i)=>{
+    sum+=c.p;
+    tbody.innerHTML+=`<tr>
+      <td>${c.n}</td>
+      <td>${c.p}</td>
+      <td><button class="secondary" onclick="removeComponent(${i})">×</button></td>
+    </tr>`;
+  });
+
+  if(sum===100){
+    sumStatus.textContent="✔ Total = 100%";
+    sumStatus.className="ok";
+  }else{
+    sumStatus.textContent="Total = "+sum+"% (Must equal 100%)";
+    sumStatus.className="error";
+  }
+
+  drawChart(activeName,activePct);
+}
+
+function drawChart(aName,aPct){
+  const labels=[];
+  const data=[];
+  if(aName && aPct>0){ labels.push(aName); data.push(aPct); }
+  components.forEach(c=>{labels.push(c.n);data.push(c.p);});
+
+  if(chart) chart.destroy();
+  chart=new Chart(document.getElementById('pieChart'),{
+    type:'pie',
+    data:{labels,datasets:[{data}]}
+  });
+}
+
+document.getElementById('activeWeight').oninput=render;
+</script>
+
 </body>
 </html>

@@ -247,4 +247,59 @@ document.addEventListener('DOMContentLoaded', function() {
             if (found) {
                 result = `${input} → ${toSubscript(found[0])}`;
             } else {
-                result = '
+                result = 'Not found in database';
+            }
+        }
+        
+        document.getElementById('convert-result').textContent = result;
+    });
+    
+    // Formula Validator
+    document.getElementById('validate-btn').addEventListener('click', function() {
+        const input = document.getElementById('validate-input').value.trim();
+        if (!input) return;
+        
+        const cleanInput = input.replace(/[₂-₉]/g, match => 
+            Object.keys(subscriptMap).find(key => subscriptMap[key] === match) || match
+        );
+        
+        const elements = parseFormula(cleanInput);
+        const validElements = Object.keys(elements).every(el => elementsDB[el]);
+        
+        if (validElements && Object.keys(elements).length > 0) {
+            document.getElementById('validate-result').innerHTML = 
+                `<span style="color: var(--success)">✓ Valid Formula: ${toSubscript(cleanInput)}</span>`;
+        } else {
+            document.getElementById('validate-result').innerHTML = 
+                `<span style="color: var(--accent)">✗ Invalid Formula</span>`;
+        }
+    });
+    
+    // Mole Calculator
+    document.getElementById('calculate-btn').addEventListener('click', function() {
+        const formula = document.getElementById('moles-input').value.trim();
+        const mass = parseFloat(document.getElementById('mass-input').value);
+        
+        if (!formula || isNaN(mass)) {
+            document.getElementById('moles-result').textContent = 'Please enter both formula and mass';
+            return;
+        }
+        
+        const cleanFormula = formula.replace(/[₂-₉]/g, match => 
+            Object.keys(subscriptMap).find(key => subscriptMap[key] === match) || match
+        );
+        
+        const molarMass = calculateMolarMass(cleanFormula);
+        const moles = mass / molarMass;
+        
+        document.getElementById('moles-result').innerHTML = `
+            <div>Molar Mass: ${molarMass.toFixed(2)} g/mol</div>
+            <div>Moles: ${moles.toFixed(4)} mol</div>
+            <div>Molecules: ${(moles * 6.022e23).toExponential(3)}</div>
+        `;
+    });
+    
+    // Update stats
+    document.getElementById('compounds-count').textContent = Object.keys(compoundsDB).length + '+';
+    document.getElementById('elements-count').textContent = Object.keys(elementsDB).length;
+});

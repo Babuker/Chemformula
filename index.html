@@ -2,22 +2,260 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>ChemFormula - أداة الصيغ الكيميائية العالمية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChemFormula - أداة الصيغ الكيميائية الذكية</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <h1>ChemFormula</h1>
-    <p>أداة محترفة لتحسين الصيغ الكيميائية</p>
-    
-    <!-- مثال لحقل إدخال -->
-    <div class="input-section">
-        <label for="formula-input">أدخل الصيغة الكيميائية:</label>
-        <input type="text" id="formula-input" placeholder="مثال: H2O, NaCl">
-        <button onclick="checkFormula()">تحليل</button>
+    <!-- شريط التنقل -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-flask"></i>
+                <h1>ChemFormula</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home"><i class="fas fa-home"></i> الرئيسية</a></li>
+                <li><a href="#tools"><i class="fas fa-tools"></i> الأدوات</a></li>
+                <li><a href="#about"><i class="fas fa-info-circle"></i> عن الأداة</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- قسم البطل -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h2><i class="fas fa-atom"></i> أداة الصيغ الكيميائية الذكية</h2>
+            <p class="subtitle">محلل، مدقق، ومحول للصيغ الكيميائية بدقة عالية</p>
+            
+            <!-- صندوق الإدخال الرئيسي -->
+            <div class="input-container">
+                <div class="input-group">
+                    <label for="chemical-input"><i class="fas fa-pencil-alt"></i> أدخل الصيغة أو اسم المادة:</label>
+                    <div class="input-with-button">
+                        <input type="text" id="chemical-input" 
+                               placeholder="مثال: H₂O, NaCl, حمض الكبريتيك" 
+                               autocomplete="off">
+                        <button id="analyze-btn" class="primary-btn">
+                            <i class="fas fa-search"></i> تحليل
+                        </button>
+                    </div>
+                    <div class="examples">
+                        <span>أمثلة:</span>
+                        <button class="example-btn" data-formula="H2O">H₂O (ماء)</button>
+                        <button class="example-btn" data-formula="NaCl">NaCl (ملح الطعام)</button>
+                        <button class="example-btn" data-formula="C6H12O6">C₆H₁₂O₆ (جلوكوز)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- نتائج التحليل -->
+    <section class="results-section" id="results" style="display: none;">
+        <div class="container">
+            <h2><i class="fas fa-chart-bar"></i> نتائج التحليل</h2>
+            
+            <div class="results-grid">
+                <!-- معلومات أساسية -->
+                <div class="result-card main-info">
+                    <h3><i class="fas fa-info-circle"></i> معلومات الصيغة</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">الصيغة المدخلة:</span>
+                            <span id="input-display" class="info-value formula-display"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">الصيغة المصححة:</span>
+                            <span id="corrected-formula" class="info-value formula-display correct"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">اسم المادة:</span>
+                            <span id="chemical-name" class="info-value"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">الحالة:</span>
+                            <span id="chemical-state" class="info-value"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الحسابات الكيميائية -->
+                <div class="result-card calculations">
+                    <h3><i class="fas fa-calculator"></i> الحسابات الكيميائية</h3>
+                    <div class="calc-grid">
+                        <div class="calc-item">
+                            <div class="calc-label">الكتلة المولية</div>
+                            <div id="molar-mass" class="calc-value">0.00</div>
+                            <div class="calc-unit">g/mol</div>
+                        </div>
+                        <div class="calc-item">
+                            <div class="calc-label">النسبة المئوية للكتلة</div>
+                            <div id="mass-percent" class="calc-value">0</div>
+                            <div class="calc-unit">%</div>
+                        </div>
+                        <div class="calc-item">
+                            <div class="calc-label">عدد الذرات</div>
+                            <div id="atom-count" class="calc-value">0</div>
+                            <div class="calc-unit">ذرة</div>
+                        </div>
+                        <div class="calc-item">
+                            <div class="calc-label">عدد العناصر</div>
+                            <div id="element-count" class="calc-value">0</div>
+                            <div class="calc-unit">عنصر</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تحليل العناصر -->
+                <div class="result-card element-analysis">
+                    <h3><i class="fas fa-table"></i> تحليل العناصر</h3>
+                    <div class="table-container">
+                        <table id="elements-table">
+                            <thead>
+                                <tr>
+                                    <th>العنصر</th>
+                                    <th>الرمز</th>
+                                    <th>العدد</th>
+                                    <th>الكتلة الذرية</th>
+                                    <th>النسبة %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="elements-tbody">
+                                <!-- سيتم ملؤها بالبيانات -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- الأدوات الإضافية -->
+    <section class="tools-section" id="tools">
+        <div class="container">
+            <h2><i class="fas fa-tools"></i> الأدوات الكيميائية</h2>
+            <div class="tools-grid">
+                
+                <!-- محول الصيغة -->
+                <div class="tool-card">
+                    <div class="tool-icon">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <h3>محول الصيغة</h3>
+                    <p>تحويل بين الصيغة الكيميائية والاسم</p>
+                    <div class="tool-inputs">
+                        <input type="text" id="convert-input" placeholder="أدخل الصيغة أو الاسم">
+                        <button id="convert-btn" class="secondary-btn">
+                            <i class="fas fa-sync-alt"></i> تحويل
+                        </button>
+                    </div>
+                    <div id="convert-result" class="tool-result"></div>
+                </div>
+
+                <!-- مدقق الصيغة -->
+                <div class="tool-card">
+                    <div class="tool-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>مدقق الصيغة</h3>
+                    <p>فحص صحة الصيغ الكيميائية</p>
+                    <div class="tool-inputs">
+                        <input type="text" id="validate-input" placeholder="أدخل الصيغة الكيميائية">
+                        <button id="validate-btn" class="secondary-btn">
+                            <i class="fas fa-check"></i> فحص
+                        </button>
+                    </div>
+                    <div id="validate-result" class="tool-result"></div>
+                </div>
+
+                <!-- حاسبة المولات -->
+                <div class="tool-card">
+                    <div class="tool-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <h3>حاسبة المولات</h3>
+                    <p>تحويل بين الكتلة وعدد المولات</p>
+                    <div class="tool-inputs">
+                        <input type="text" id="moles-input" placeholder="أدخل الصيغة">
+                        <input type="number" id="mass-input" placeholder="الكتلة (جرام)" step="0.01">
+                        <button id="calculate-btn" class="secondary-btn">
+                            <i class="fas fa-calculator"></i> حساب
+                        </button>
+                    </div>
+                    <div id="moles-result" class="tool-result"></div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- عن المشروع -->
+    <section class="about-section" id="about">
+        <div class="container">
+            <h2><i class="fas fa-info-circle"></i> عن ChemFormula</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>ChemFormula هي أداة متكاملة لتحليل ومعالجة الصيغ الكيميائية. تم تصميمها لمساعدة الطلاب والباحثين والمهتمين بالكيمياء في فهم وتحليل المركبات الكيميائية بدقة وسهولة.</p>
+                    
+                    <h3><i class="fas fa-star"></i> المميزات:</h3>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> تحليل دقيق للصيغ الكيميائية</li>
+                        <li><i class="fas fa-check"></i> حساب الكتلة المولية والنسب المئوية</li>
+                        <li><i class="fas fa-check"></i> قاعدة بيانات للمركبات الشائعة</li>
+                        <li><i class="fas fa-check"></i> واجهة سهلة الاستخدام باللغة العربية</li>
+                        <li><i class="fas fa-check"></i> نتائج فورية ودقيقة</li>
+                    </ul>
+                </div>
+                
+                <div class="about-stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="compounds-count">150+</div>
+                        <div class="stat-label">مركب كيميائي</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="elements-count">118</div>
+                        <div class="stat-label">عنصر في القاعدة</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="calculations-count">5</div>
+                        <div class="stat-label">نوع حساب</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- تذييل الصفحة -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-flask"></i>
+                    <span>ChemFormula</span>
+                </div>
+                <p>أداة متكاملة للصيغ الكيميائية © 2023</p>
+                <div class="footer-links">
+                    <a href="#"><i class="fab fa-github"></i> GitHub</a>
+                    <a href="#"><i class="fas fa-envelope"></i> اتصل بنا</a>
+                    <a href="#"><i class="fas fa-question-circle"></i> المساعدة</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- نموذج الاشتراك (مثال) -->
+    <div class="modal" id="subscribe-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3><i class="fas fa-envelope"></i> اشترك في النشرة البريدية</h3>
+            <p>احصل على آخر التحديثات والأدوات الكيميائية الجديدة</p>
+            <input type="email" id="subscribe-email" placeholder="بريدك الإلكتروني">
+            <button id="subscribe-btn" class="primary-btn">اشتراك</button>
+        </div>
     </div>
-    
-    <div id="result"></div>
-    
+
     <script src="script.js"></script>
 </body>
 </html>

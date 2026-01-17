@@ -1,97 +1,130 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('chemForm');
-  const resultsSection = document.getElementById('results-section');
-  const formulationResults = document.getElementById('formulationResults');
+  const excipientModeRadios = document.querySelectorAll('input[name="excipientMode"]');
+  const excipientNamesSection = document.getElementById('excipientNamesSection');
+  const excipientContainer = document.getElementById('excipientContainer');
+  const addExcipientBtn = document.getElementById('addExcipientBtn');
+  const resultsSection = document.getElementById('results');
+  const resultsTableBody = document.querySelector('#resultsTable tbody');
   const ctx = document.getElementById('formulationChart').getContext('2d');
   let chart = null;
 
-  form.addEventListener('submit', (e) => {
+  // Show/hide excipient names input based on mode
+  excipientModeRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      if (radio.value === 'manual' && radio.checked) {
+        excipientNamesSection.style.display = 'block';
+      } else {
+        excipientNamesSection.style.display = 'none';
+      }
+    });
+  });
+
+  // Add new excipient row
+  addExcipientBtn.addEventListener('click', () => {
+    const row = document.createElement('div');
+    row.className = 'excipient-row';
+    row.innerHTML = `
+      <input type="text" name="excipientName" placeholder="اسم المادة المضافة" required />
+      <input type="number" name="excipientWeight" placeholder="الكمية (بالملجرام)" min="0" step="any" required />
+      <button type="button" class="removeExcipientBtn">حذف</button>
+    `;
+    excipientContainer.appendChild(row);
+  });
+
+  // Remove excipient row
+  excipientContainer.addEventListener('click', (e) => {
+    if (e.target.classList.contains('removeExcipientBtn')) {
+      e.target.parentElement.remove();
+    }
+  });
+
+  // Form submission
+  document.getElementById('formulationForm').addEventListener('submit', e => {
     e.preventDefault();
 
-    // جمع البيانات
-    const activeName = form.activeName.value.trim();
-    const activeConc = parseFloat(form.activeConcentration.value);
-    const dosageForm = form.dosageForm.value;
-    const inputMethod = form.inputMethod.value;
-    const referenceStandard = form.referenceStandard.value;
+    // جمع البيانات من الخطوات
+    const activeName = e.target.activeName.value.trim();
+    const activeConc = parseFloat(e.target.activeConcentration.value);
+    const standardType = e.target.standardType.value;
+    const dosageForm = e.target.dosageForm.value;
+    const formulationBasis = e.target.formulationBasis.value;
+    const releaseMechanism = e.target.releaseMechanism.value;
+    const excipientMode = e.target.excipientMode.value;
 
-    if (!activeName || isNaN(activeConc) || activeConc <= 0 || !dosageForm) {
-      alert('Please fill all required fields correctly.');
+    if (!activeName || isNaN(activeConc) || activeConc <= 0) {
+      alert('الرجاء إدخال اسم وتركيز المادة الفعالة بشكل صحيح.');
       return;
     }
 
-    // نموذج بسيط لتحديد المواد المضافة (excipients) بناءً على الشكل الدوائي
-    const excipientsOptions = {
-      tablet: [
-        { name: 'Lactose', percent: 30 },
-        { name: 'Microcrystalline Cellulose', percent: 40 },
-        { name: 'Magnesium Stearate', percent: 5 },
-        { name: 'Povidone', percent: 5 }
-      ],
-      syrup: [
-        { name: 'Sucrose', percent: 60 },
-        { name: 'Preservative', percent: 10 },
-        { name: 'Flavor', percent: 10 },
-        { name: 'Water', percent: 20 }
-      ],
-      capsule: [
-        { name: 'Gelatin', percent: 50 },
-        { name: 'Starch', percent: 30 },
-        { name: 'Magnesium Stearate', percent: 10 },
-        { name: 'Silica', percent: 10 }
-      ],
-      injection: [
-        { name: 'Sterile Water', percent: 85 },
-        { name: 'Buffer Solution', percent: 10 },
-        { name: 'Preservative', percent: 5 }
-      ]
-    };
+    // تجميع المواد المضافة
+    let excipients = [];
+    if (excipientMode === 'manual') {
+      const excipientNames = e.target.querySelectorAll('input[name="excipientName"]');
+      const excipientWeights = e.target.querySelectorAll('input[name="excipientWeight"]');
 
-    const excipients = excipientsOptions[dosageForm] || [];
-
-    // التركيبة النهائية مع المادة الفعالة
-    const totalPercentExcipients = excipients.reduce((sum, e) => sum + e.percent, 0);
-    const activePercent = 100 - totalPercentExcipients;
-
-    // تحضير بيانات العرض
-    const labels = [activeName, ...excipients.map(e => e.name)];
-    const data = [activePercent, ...excipients.map(e => e.percent)];
-
-    // عرض النتيجة النصية
-    formulationResults.innerHTML = `
-      <p>Formulation for <strong>${activeName}</strong> (${activeConc} mg per unit), Dosage Form: <strong>${dosageForm}</strong>, Reference: <strong>${referenceStandard}</strong>.</p>
-      <p>Active Ingredient Percentage: <strong>${activePercent.toFixed(2)}%</strong></p>
-      <p>Excipients and their percentages:</p>
-      <ul>
-        ${excipients.map(e => `<li>${e.name}: ${e.percent}%</li>`).join('')}
-      </ul>
-    `;
-
-    // عرض الرسم البياني الدائري
-    if (chart) {
-      chart.destroy();
+      for (let i = 0; i < excipientNames.length; i++) {
+        const name = excipientNames[i].value.trim();
+        const weight = parseFloat(excipientWeights[i].value);
+        if (!name || isNaN(weight) || weight < 0) {
+          alert('الرجاء إدخال أسماء وكمية المواد المضافة بشكل صحيح.');
+          return;
+        }
+        excipients.push({ name, weight });
+      }
+    } else {
+      // الوضع الآلي: نستخدم مثال مواد مضافة ثابتة (يمكن تطويره لاحقًا)
+      excipients = [
+        { name: 'مادة مضافة 1', weight: 10 },
+        { name: 'مادة مضافة 2', weight: 5 }
+      ];
     }
+
+    // الحساب: جمع الكميات
+    const totalWeight = activeConc + excipients.reduce((acc, x) => acc + x.weight, 0);
+
+    // تحضير الجدول
+    resultsTableBody.innerHTML = '';
+    // المادة الفعالة
+    resultsTableBody.innerHTML += `<tr>
+      <td>${activeName} (Active)</td>
+      <td>${activeConc.toFixed(2)}</td>
+      <td>${((activeConc / totalWeight) * 100).toFixed(2)}</td>
+    </tr>`;
+    // المواد المضافة
+    excipients.forEach(({ name, weight }) => {
+      resultsTableBody.innerHTML += `<tr>
+        <td>${name}</td>
+        <td>${weight.toFixed(2)}</td>
+        <td>${((weight / totalWeight) * 100).toFixed(2)}</td>
+      </tr>`;
+    });
+
+    resultsSection.style.display = 'block';
+
+    // رسم المخطط الدائري
+    if (chart) chart.destroy();
+
     chart = new Chart(ctx, {
       type: 'pie',
       data: {
-        labels,
+        labels: [activeName, ...excipients.map(x => x.name)],
         datasets: [{
-          data,
+          data: [activeConc, ...excipients.map(x => x.weight)],
           backgroundColor: [
-            '#007BFF', '#28A745', '#FFC107', '#DC3545', '#6F42C1',
-            '#17A2B8', '#FD7E14', '#20C997', '#6610F2', '#E83E8C'
+            '#007BFF', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#17a2b8', '#fd7e14', '#20c997'
           ],
         }]
       },
       options: {
         responsive: true,
         plugins: {
-          legend: { position: 'bottom' }
+          legend: {
+            position: 'bottom'
+          }
         }
       }
     });
 
-    resultsSection.style.display = 'block';
-    resultsSection.scrollIntoView({behavior: "smooth"});
+    // هنا يمكن وضع منطق اختيار التركيبة المثالية مستقبلاً
   });
 });

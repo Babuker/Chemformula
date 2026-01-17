@@ -1,1 +1,0 @@
-console.log('ChemFormula v2.0 ready');

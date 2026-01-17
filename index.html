@@ -5,15 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ChemFormula® | Global Chemical Formulation Tool</title>
 
-  <!-- Meta (Professional / Legal-ready) -->
-  <meta name="description" content="ChemFormula® is a professional chemical formulation optimizer ensuring 100% accuracy, manual active ingredient control, auto or manual batch weight, multilingual support, and visual analytics."/>
-  <meta name="author" content="ChemFormula®"/>
-  <meta name="robots" content="index, follow"/>
-
-  <!-- Styles -->
+  <meta name="description" content="Professional chemical formulation tool with smart ingredient and excipient optimization."/>
   <link rel="stylesheet" href="style.css"/>
-
-  <!-- Chart.js (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -23,33 +16,59 @@
   </header>
 
   <main>
-    <section id="form-section">
-      <h2>Chemical Formulation Input</h2>
-      <form id="chemForm">
-        <label for="totalWeight">Total Unit Weight:</label>
-        <select id="weightInputType" name="weightInputType">
-          <option value="manufacturer">Manufacturer Input</option>
-          <option value="auto">Auto Calculate</option>
+    <form id="chemForm">
+      <section class="step" id="step1">
+        <h2>1. Active Ingredient Details</h2>
+        <label for="activeName">Active Ingredient Name:</label>
+        <input type="text" id="activeName" name="activeName" placeholder="Enter active ingredient name" required/>
+
+        <label for="activeConcentration">Concentration (mg per unit):</label>
+        <input type="number" id="activeConcentration" name="activeConcentration" placeholder="e.g. 500" min="0" step="any" required/>
+
+        <label>Dosage Form:</label>
+        <select id="dosageForm" name="dosageForm" required>
+          <option value="">-- Select --</option>
+          <option value="tablet">Tablet</option>
+          <option value="syrup">Syrup</option>
+          <option value="capsule">Capsule</option>
+          <option value="injection">Injection</option>
         </select>
-        <input type="number" id="totalWeight" name="totalWeight" placeholder="Enter weight" min="0" step="any" required/>
+      </section>
 
-        <h3>Active Ingredients</h3>
-        <div id="ingredientsContainer">
-          <div class="ingredient-row">
-            <input type="text" name="ingredientName" placeholder="Ingredient Name" required/>
-            <input type="number" name="ingredientWeight" placeholder="Weight" min="0" step="any" required/>
-            <button type="button" class="removeIngredientBtn">Remove</button>
-          </div>
-        </div>
-        <button type="button" id="addIngredientBtn">Add Ingredient</button>
+      <section class="step" id="step2">
+        <h2>2. Active Ingredient Input Method</h2>
+        <label>
+          <input type="radio" name="inputMethod" value="manual" checked/>
+          Manual Entry
+        </label>
+        <label>
+          <input type="radio" name="inputMethod" value="auto"/>
+          Automatic Suggestion
+        </label>
+      </section>
 
-        <button type="submit">Calculate Formulation</button>
-      </form>
-    </section>
+      <section class="step" id="step3">
+        <h2>3. Pharmacopoeia Reference</h2>
+        <label>
+          <input type="radio" name="referenceStandard" value="BP" checked/>
+          British Pharmacopoeia (BP)
+        </label>
+        <label>
+          <input type="radio" name="referenceStandard" value="USP"/>
+          United States Pharmacopeia (USP)
+        </label>
+      </section>
 
-    <section id="results-section">
-      <h2>Results</h2>
-      <p id="totalPercentage"></p>
+      <section class="step" id="step4">
+        <h2>4. Formulation Optimization</h2>
+        <p>Based on your inputs, the program will calculate the ideal formulation including excipients and their proportions.</p>
+        <button type="submit">Calculate Ideal Formulation</button>
+      </section>
+    </form>
+
+    <section id="results-section" style="display:none;">
+      <h2>Formulation Results</h2>
+      <div id="formulationResults"></div>
       <canvas id="formulationChart"></canvas>
     </section>
   </main>

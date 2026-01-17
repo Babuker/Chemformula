@@ -2,81 +2,327 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ChemFormula® | Global Chemical Formulation Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChemFormula® | Advanced Chemical Formulation Tool</title>
 
-  <meta name="description" content="Professional chemical formulation tool with smart ingredient and excipient optimization."/>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9fafb;
+      color: #222;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #007BFF;
+    }
+    form {
+      background: #fff;
+      padding: 20px 25px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+    .step {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    .inline-radio-group {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 15px;
+    }
+    .inline-radio-group label {
+      font-weight: normal;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 25px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #007BFF;
+      color: white;
+    }
+    #chartContainer {
+      max-width: 600px;
+      margin: 30px auto 0;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <h1>ChemFormula®</h1>
-    <p>Your Global Chemical Formulation Optimizer</p>
-  </header>
 
-  <main>
-    <form id="chemForm">
-      <section class="step" id="step1">
-        <h2>1. Active Ingredient Details</h2>
-        <label for="activeName">Active Ingredient Name:</label>
-        <input type="text" id="activeName" name="activeName" placeholder="Enter active ingredient name" required/>
+  <h1>ChemFormula®</h1>
+  <h2>Advanced Chemical Formulation Tool</h2>
 
-        <label for="activeConcentration">Concentration (mg per unit):</label>
-        <input type="number" id="activeConcentration" name="activeConcentration" placeholder="e.g. 500" min="0" step="any" required/>
+  <form id="formulationForm">
 
-        <label>Dosage Form:</label>
-        <select id="dosageForm" name="dosageForm" required>
-          <option value="">-- Select --</option>
-          <option value="tablet">Tablet</option>
-          <option value="syrup">Syrup</option>
-          <option value="capsule">Capsule</option>
-          <option value="injection">Injection</option>
-        </select>
-      </section>
+    <!-- Step 1 -->
+    <div class="step">
+      <label for="activeName">1. اسم المادة الفعالة (Active Ingredient Name)</label>
+      <input type="text" id="activeName" name="activeName" placeholder="ادخل اسم المادة الفعالة" required />
+      <label for="activeConcentration">تركيز المادة الفعالة (بالملجرام)</label>
+      <input type="number" id="activeConcentration" name="activeConcentration" placeholder="مثلاً 250" min="0" step="any" required />
+    </div>
 
-      <section class="step" id="step2">
-        <h2>2. Active Ingredient Input Method</h2>
-        <label>
-          <input type="radio" name="inputMethod" value="manual" checked/>
-          Manual Entry
-        </label>
-        <label>
-          <input type="radio" name="inputMethod" value="auto"/>
-          Automatic Suggestion
-        </label>
-      </section>
+    <!-- Step 2 -->
+    <div class="step">
+      <label>2. نوع الدستور المرجع (Reference Standard)</label>
+      <div class="inline-radio-group">
+        <label><input type="radio" name="standardType" value="BP" required /> BP</label>
+        <label><input type="radio" name="standardType" value="USP" /> USP</label>
+      </div>
+    </div>
 
-      <section class="step" id="step3">
-        <h2>3. Pharmacopoeia Reference</h2>
-        <label>
-          <input type="radio" name="referenceStandard" value="BP" checked/>
-          British Pharmacopoeia (BP)
-        </label>
-        <label>
-          <input type="radio" name="referenceStandard" value="USP"/>
-          United States Pharmacopeia (USP)
-        </label>
-      </section>
+    <!-- Step 3 -->
+    <div class="step">
+      <label>3. الشكل المطلوب (Dosage Form)</label>
+      <select id="dosageForm" name="dosageForm" required>
+        <option value="" disabled selected>اختر الشكل</option>
+        <option value="tablet">قرص</option>
+        <option value="liquid">شراب سائل</option>
+        <option value="powder">بودرة جافة</option>
+      </select>
+    </div>
 
-      <section class="step" id="step4">
-        <h2>4. Formulation Optimization</h2>
-        <p>Based on your inputs, the program will calculate the ideal formulation including excipients and their proportions.</p>
-        <button type="submit">Calculate Ideal Formulation</button>
-      </section>
-    </form>
+    <!-- Step 4 -->
+    <div class="step">
+      <label>4. أساس إنشاء التركيبة (Formulation Basis)</label>
+      <select id="formulationBasis" name="formulationBasis" required>
+        <option value="" disabled selected>اختر الأساس</option>
+        <option value="balance">توازن الجودة والتكلفة</option>
+        <option value="quality">الجودة فقط</option>
+        <option value="cost">التكلفة فقط</option>
+      </select>
+    </div>
 
-    <section id="results-section" style="display:none;">
-      <h2>Formulation Results</h2>
-      <div id="formulationResults"></div>
+    <!-- Step 5 -->
+    <div class="step">
+      <label>5. طريقة تحرر المادة الفعالة (Release Mechanism)</label>
+      <select id="releaseMechanism" name="releaseMechanism" required>
+        <option value="" disabled selected>اختر الطريقة</option>
+        <option value="immediate">تحرر مباشر</option>
+        <option value="sustained">تحرر مطوّل</option>
+        <option value="delayed">تحرر متأخر</option>
+      </select>
+    </div>
+
+    <!-- Step 6 -->
+    <div class="step">
+      <label>6. اختيار أسماء المواد المضافة (Excipients Selection Mode)</label>
+      <div class="inline-radio-group">
+        <label><input type="radio" name="excipientMode" value="manual" required /> يدويًا</label>
+        <label><input type="radio" name="excipientMode" value="auto" /> آليًا</label>
+      </div>
+    </div>
+
+    <!-- Step 7 -->
+    <div class="step" id="excipientNamesSection" style="display:none;">
+      <label>7. تحديد أسماء المواد المضافة</label>
+      <div id="excipientContainer">
+        <div class="excipient-row">
+          <input type="text" name="excipientName" placeholder="اسم المادة المضافة" required />
+          <input type="number" name="excipientWeight" placeholder="الكمية (بالملجرام)" min="0" step="any" required />
+          <button type="button" class="removeExcipientBtn">حذف</button>
+        </div>
+      </div>
+      <button type="button" id="addExcipientBtn">إضافة مادة مضافة</button>
+    </div>
+
+    <button type="submit">احسب التركيبة المثالية</button>
+  </form>
+
+  <!-- Results -->
+  <section id="results" style="display:none;">
+    <h2>النتائج</h2>
+    <table id="resultsTable">
+      <thead>
+        <tr>
+          <th>اسم المادة</th>
+          <th>الكمية (ملجم)</th>
+          <th>النسبة المئوية (%)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div id="chartContainer">
       <canvas id="formulationChart"></canvas>
-    </section>
-  </main>
+    </div>
+  </section>
 
-  <footer>
-    <p>© 2026 ChemFormula®. All rights reserved.</p>
-  </footer>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const excipientModeRadios = document.querySelectorAll('input[name="excipientMode"]');
+    const excipientNamesSection = document.getElementById('excipientNamesSection');
+    const excipientContainer = document.getElementById('excipientContainer');
+    const addExcipientBtn = document.getElementById('addExcipientBtn');
+    const resultsSection = document.getElementById('results');
+    const resultsTableBody = document.querySelector('#resultsTable tbody');
+    const ctx = document.getElementById('formulationChart').getContext('2d');
+    let chart = null;
 
-  <script src="script.js"></script>
+    // Show/hide excipient names input based on mode
+    excipientModeRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        if (radio.value === 'manual' && radio.checked) {
+          excipientNamesSection.style.display = 'block';
+        } else {
+          excipientNamesSection.style.display = 'none';
+        }
+      });
+    });
+
+    // Add new excipient row
+    addExcipientBtn.addEventListener('click', () => {
+      const row = document.createElement('div');
+      row.className = 'excipient-row';
+      row.style.display = 'flex';
+      row.style.gap = '10px';
+      row.style.marginBottom = '8px';
+      row.innerHTML = `
+        <input type="text" name="excipientName" placeholder="اسم المادة المضافة" required />
+        <input type="number" name="excipientWeight" placeholder="الكمية (بالملجرام)" min="0" step="any" required />
+        <button type="button" class="removeExcipientBtn">حذف</button>
+      `;
+      excipientContainer.appendChild(row);
+    });
+
+    // Remove excipient row
+    excipientContainer.addEventListener('click', (e) => {
+      if (e.target.classList.contains('removeExcipientBtn')) {
+        e.target.parentElement.remove();
+      }
+    });
+
+    // Form submission
+    document.getElementById('formulationForm').addEventListener('submit', e => {
+      e.preventDefault();
+
+      // جمع البيانات من الخطوات
+      const activeName = e.target.activeName.value.trim();
+      const activeConc = parseFloat(e.target.activeConcentration.value);
+      const standardType = e.target.standardType.value;
+      const dosageForm = e.target.dosageForm.value;
+      const formulationBasis = e.target.formulationBasis.value;
+      const releaseMechanism = e.target.releaseMechanism.value;
+      const excipientMode = e.target.excipientMode.value;
+
+      if (!activeName || isNaN(activeConc) || activeConc <= 0) {
+        alert('الرجاء إدخال اسم وتركيز المادة الفعالة بشكل صحيح.');
+        return;
+      }
+
+      // تجميع المواد المضافة
+      let excipients = [];
+      if (excipientMode === 'manual') {
+        const excipientNames = e.target.querySelectorAll('input[name="excipientName"]');
+        const excipientWeights = e.target.querySelectorAll('input[name="excipientWeight"]');
+
+        for (let i = 0; i < excipientNames.length; i++) {
+          const name = excipientNames[i].value.trim();
+          const weight = parseFloat(excipientWeights[i].value);
+          if (!name || isNaN(weight) || weight < 0) {
+            alert('الرجاء إدخال أسماء وكمية المواد المضافة بشكل صحيح.');
+            return;
+          }
+          excipients.push({ name, weight });
+        }
+      } else {
+        // الوضع الآلي: نستخدم مثال مواد مضافة ثابتة (يمكن تطويره لاحقًا)
+        excipients = [
+          { name: 'مادة مضافة 1', weight: 10 },
+          { name: 'مادة مضافة 2', weight: 5 }
+        ];
+      }
+
+      // الحساب: جمع الكميات
+      const totalWeight = activeConc + excipients.reduce((acc, x) => acc + x.weight, 0);
+
+      // تحضير الجدول
+      resultsTableBody.innerHTML = '';
+      // المادة الفعالة
+      resultsTableBody.innerHTML += `<tr>
+        <td>${activeName} (Active)</td>
+        <td>${activeConc.toFixed(2)}</td>
+        <td>${((activeConc / totalWeight) * 100).toFixed(2)}</td>
+      </tr>`;
+      // المواد المضافة
+      excipients.forEach(({ name, weight }) => {
+        resultsTableBody.innerHTML += `<tr>
+          <td>${name}</td>
+          <td>${weight.toFixed(2)}</td>
+          <td>${((weight / totalWeight) * 100).toFixed(2)}</td>
+        </tr>`;
+      });
+
+      resultsSection.style.display = 'block';
+
+      // رسم المخطط الدائري
+      if (chart) chart.destroy();
+
+      chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: [activeName, ...excipients.map(x => x.name)],
+          datasets: [{
+            data: [activeConc, ...excipients.map(x => x.weight)],
+            backgroundColor: [
+              '#007BFF', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#17a2b8', '#fd7e14', '#20c997'
+            ],
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+
+      // هنا يمكن وضع منطق اختيار التركيبة المثالية مستقبلاً
+    });
+  });
+</script>
+
 </body>
 </html>

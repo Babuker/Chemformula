@@ -15,224 +15,49 @@
 
   <!-- Chart.js (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <style>
-    /* Fallback minimal styling if style.css not loaded */
-    body{font-family:Arial,Helvetica,sans-serif;background:#f6f8fb;margin:0;color:#1f2937}
-    header{background:#0f172a;color:#fff;padding:16px}
-    header h1{margin:0;font-size:20px}
-    main{padding:20px;max-width:1100px;margin:auto}
-    .card{background:#fff;border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 10px 25px rgba(0,0,0,.06)}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
-    label{font-weight:600;font-size:14px}
-    input,select,button{width:100%;padding:10px;border-radius:8px;border:1px solid #d1d5db;margin-top:6px}
-    button{background:#2563eb;color:#fff;border:none;font-weight:700;cursor:pointer}
-    button.secondary{background:#64748b}
-    table{width:100%;border-collapse:collapse;margin-top:10px}
-    th,td{border:1px solid #e5e7eb;padding:8px;text-align:center}
-    th{background:#f1f5f9}
-    footer{padding:16px;text-align:center;color:#64748b}
-    .lang{float:right}
-    .badge{display:inline-block;background:#e5f0ff;color:#1d4ed8;padding:4px 8px;border-radius:999px;font-size:12px}
-    .error{color:#b91c1c;font-weight:700}
-    .ok{color:#047857;font-weight:700}
-  </style>
 </head>
-
 <body>
-<header>
-  <h1>ChemFormula® <span class="badge">Global Edition</span></h1>
-  <select id="langSelect" class="lang">
-    <option value="en">English</option>
-    <option value="ar">العربية</option>
-  </select>
-</header>
+  <header>
+    <h1>ChemFormula®</h1>
+    <p>Your Global Chemical Formulation Optimizer</p>
+  </header>
 
-<main>
-
-  <!-- Unit Weight -->
-  <div class="card">
-    <h2 data-i18n="unitTitle">Unit Weight</h2>
-    <div class="grid">
-      <div>
-        <label data-i18n="weightMode">Weight Input Mode</label>
-        <select id="weightMode">
-          <option value="manual" data-i18n="manual">Manual (Manufacturer)</option>
-          <option value="auto" data-i18n="auto">Auto (Calculated)</option>
+  <main>
+    <section id="form-section">
+      <h2>Chemical Formulation Input</h2>
+      <form id="chemForm">
+        <label for="totalWeight">Total Unit Weight:</label>
+        <select id="weightInputType" name="weightInputType">
+          <option value="manufacturer">Manufacturer Input</option>
+          <option value="auto">Auto Calculate</option>
         </select>
-      </div>
-      <div>
-        <label data-i18n="unitWeight">Total Unit Weight (kg)</label>
-        <input id="unitWeight" type="number" min="0" step="0.01" value="100"/>
-      </div>
-    </div>
-  </div>
+        <input type="number" id="totalWeight" name="totalWeight" placeholder="Enter weight" min="0" step="any" required/>
 
-  <!-- Active Ingredient (Manual Only) -->
-  <div class="card">
-    <h2 data-i18n="activeTitle">Active Ingredient (Manual)</h2>
-    <div class="grid">
-      <div>
-        <label data-i18n="activeName">Active Ingredient Name</label>
-        <input id="activeName" placeholder="e.g. Sodium Chloride"/>
-      </div>
-      <div>
-        <label data-i18n="activeWeight">Active Ingredient Weight (%)</label>
-        <input id="activeWeight" type="number" min="0" step="0.01"/>
-      </div>
-    </div>
-    <p class="badge" data-i18n="manualOnly">Active ingredient is manual input only.</p>
-  </div>
+        <h3>Active Ingredients</h3>
+        <div id="ingredientsContainer">
+          <div class="ingredient-row">
+            <input type="text" name="ingredientName" placeholder="Ingredient Name" required/>
+            <input type="number" name="ingredientWeight" placeholder="Weight" min="0" step="any" required/>
+            <button type="button" class="removeIngredientBtn">Remove</button>
+          </div>
+        </div>
+        <button type="button" id="addIngredientBtn">Add Ingredient</button>
 
-  <!-- Components -->
-  <div class="card">
-    <h2 data-i18n="components">Other Components</h2>
-    <div class="grid">
-      <input id="compName" placeholder="Component name"/>
-      <input id="compPct" type="number" min="0" step="0.01" placeholder="%"/>
-      <button onclick="addComponent()" data-i18n="add">Add</button>
-    </div>
+        <button type="submit">Calculate Formulation</button>
+      </form>
+    </section>
 
-    <table>
-      <thead>
-        <tr>
-          <th data-i18n="name">Name</th>
-          <th data-i18n="percentage">%</th>
-          <th data-i18n="remove">Remove</th>
-        </tr>
-      </thead>
-      <tbody id="componentsBody"></tbody>
-    </table>
+    <section id="results-section">
+      <h2>Results</h2>
+      <p id="totalPercentage"></p>
+      <canvas id="formulationChart"></canvas>
+    </section>
+  </main>
 
-    <p id="sumStatus" class="error"></p>
-  </div>
+  <footer>
+    <p>© 2026 ChemFormula®. All rights reserved.</p>
+  </footer>
 
-  <!-- Chart -->
-  <div class="card">
-    <h2 data-i18n="chart">Composition Chart</h2>
-    <canvas id="pieChart" height="140"></canvas>
-  </div>
-
-</main>
-
-<footer>
-  © 2026 ChemFormula® — All rights reserved. | <a href="legal/">Legal</a>
-</footer>
-
-<script>
-/* ===================== i18n ===================== */
-const i18n = {
-  en:{
-    unitTitle:"Unit Weight",
-    weightMode:"Weight Input Mode",
-    manual:"Manual (Manufacturer)",
-    auto:"Auto (Calculated)",
-    unitWeight:"Total Unit Weight (kg)",
-    activeTitle:"Active Ingredient (Manual)",
-    activeName:"Active Ingredient Name",
-    activeWeight:"Active Ingredient Weight (%)",
-    manualOnly:"Active ingredient is manual input only.",
-    components:"Other Components",
-    add:"Add",
-    name:"Name",
-    percentage:"Percentage",
-    remove:"Remove",
-    chart:"Composition Chart"
-  },
-  ar:{
-    unitTitle:"وزن الوحدة",
-    weightMode:"طريقة إدخال الوزن",
-    manual:"يدوي (الشركة المصنعة)",
-    auto:"تلقائي (محسوب)",
-    unitWeight:"الوزن الكلي للوحدة (كجم)",
-    activeTitle:"المادة الفعالة (يدوي)",
-    activeName:"اسم المادة الفعالة",
-    activeWeight:"وزن المادة الفعالة (%)",
-    manualOnly:"إدخال المادة الفعالة يدوي فقط.",
-    components:"المكونات الأخرى",
-    add:"إضافة",
-    name:"الاسم",
-    percentage:"النسبة %",
-    remove:"حذف",
-    chart:"الرسم البياني للتركيب"
-  }
-};
-
-const langSelect=document.getElementById('langSelect');
-langSelect.onchange=()=>applyLang(langSelect.value);
-function applyLang(l){
-  document.documentElement.lang=l;
-  document.querySelectorAll('[data-i18n]').forEach(el=>{
-    const k=el.getAttribute('data-i18n');
-    if(i18n[l][k]) el.textContent=i18n[l][k];
-  });
-}
-applyLang('en');
-
-/* ===================== Logic ===================== */
-let components=[];
-const tbody=document.getElementById('componentsBody');
-const sumStatus=document.getElementById('sumStatus');
-let chart;
-
-function addComponent(){
-  const n=document.getElementById('compName').value.trim();
-  const p=parseFloat(document.getElementById('compPct').value);
-  if(!n || isNaN(p)) return;
-  components.push({n,p});
-  render();
-}
-
-function removeComponent(i){
-  components.splice(i,1);
-  render();
-}
-
-function render(){
-  tbody.innerHTML='';
-  let sum=0;
-
-  const activeName=document.getElementById('activeName').value.trim();
-  const activePct=parseFloat(document.getElementById('activeWeight').value)||0;
-  if(activeName && activePct>0){
-    sum+=activePct;
-  }
-
-  components.forEach((c,i)=>{
-    sum+=c.p;
-    tbody.innerHTML+=`<tr>
-      <td>${c.n}</td>
-      <td>${c.p}</td>
-      <td><button class="secondary" onclick="removeComponent(${i})">×</button></td>
-    </tr>`;
-  });
-
-  if(sum===100){
-    sumStatus.textContent="✔ Total = 100%";
-    sumStatus.className="ok";
-  }else{
-    sumStatus.textContent="Total = "+sum+"% (Must equal 100%)";
-    sumStatus.className="error";
-  }
-
-  drawChart(activeName,activePct);
-}
-
-function drawChart(aName,aPct){
-  const labels=[];
-  const data=[];
-  if(aName && aPct>0){ labels.push(aName); data.push(aPct); }
-  components.forEach(c=>{labels.push(c.n);data.push(c.p);});
-
-  if(chart) chart.destroy();
-  chart=new Chart(document.getElementById('pieChart'),{
-    type:'pie',
-    data:{labels,datasets:[{data}]}
-  });
-}
-
-document.getElementById('activeWeight').oninput=render;
-</script>
-
+  <script src="script.js"></script>
 </body>
 </html>

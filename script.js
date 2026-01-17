@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const excipientModeRadios = document.querySelectorAll('input[name="excipientMode"]');
+  const form = document.getElementById('formulationForm');
+  const excipientModeRadios = form.elements['excipientMode'];
   const excipientNamesSection = document.getElementById('excipientNamesSection');
   const excipientContainer = document.getElementById('excipientContainer');
   const addExcipientBtn = document.getElementById('addExcipientBtn');
@@ -8,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const ctx = document.getElementById('formulationChart').getContext('2d');
   let chart = null;
 
-  // Show/hide excipient names input based on mode
+  // Show/hide excipients input based on mode
   excipientModeRadios.forEach(radio => {
     radio.addEventListener('change', () => {
       if (radio.value === 'manual' && radio.checked) {
@@ -19,14 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Add new excipient row
+  // Add excipient row
   addExcipientBtn.addEventListener('click', () => {
     const row = document.createElement('div');
     row.className = 'excipient-row';
     row.innerHTML = `
-      <input type="text" name="excipientName" placeholder="اسم المادة المضافة" required />
-      <input type="number" name="excipientWeight" placeholder="الكمية (بالملجرام)" min="0" step="any" required />
-      <button type="button" class="removeExcipientBtn">حذف</button>
+      <input type="text" name="excipientName" placeholder="Excipient name" required />
+      <input type="number" name="excipientWeight" placeholder="Weight (mg)" min="0" step="any" required />
+      <button type="button" class="removeExcipientBtn">Remove</button>
     `;
     excipientContainer.appendChild(row);
   });
@@ -38,93 +39,139 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Form submission
-  document.getElementById('formulationForm').addEventListener('submit', e => {
+  // Main form submission
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    // جمع البيانات من الخطوات
-    const activeName = e.target.activeName.value.trim();
-    const activeConc = parseFloat(e.target.activeConcentration.value);
-    const standardType = e.target.standardType.value;
-    const dosageForm = e.target.dosageForm.value;
-    const formulationBasis = e.target.formulationBasis.value;
-    const releaseMechanism = e.target.releaseMechanism.value;
-    const excipientMode = e.target.excipientMode.value;
+    // Clear previous results
+    resultsTableBody.innerHTML = '';
+    resultsSection.style.display = 'none';
+    if (chart) {
+      chart.destroy();
+      chart = null;
+    }
 
-    if (!activeName || isNaN(activeConc) || activeConc <= 0) {
-      alert('الرجاء إدخال اسم وتركيز المادة الفعالة بشكل صحيح.');
+    // Read active ingredient
+    const activeName = form.activeName.value.trim();
+    const activeConcentration = parseFloat(form.activeConcentration.value);
+    if (!activeName) {
+      alert('Please enter the active ingredient name.');
+      return;
+    }
+    if (isNaN(activeConcentration) || activeConcentration <= 0) {
+      alert('Please enter a valid active ingredient concentration.');
       return;
     }
 
-    // تجميع المواد المضافة
-    let excipients = [];
-    if (excipientMode === 'manual') {
-      const excipientNames = e.target.querySelectorAll('input[name="excipientName"]');
-      const excipientWeights = e.target.querySelectorAll('input[name="excipientWeight"]');
+    // Other inputs (just to check they're selected)
+    if (!form.standardType.value) {
+      alert('Please select the reference standard.');
+      return;
+    }
+    if (!form.dosageForm.value) {
+      alert('Please select the dosage form.');
+      return;
+    }
+    if (!form.formulationBasis.value) {
+      alert('Please select the formulation basis.');
+      return;
+    }
+    if (!form.releaseMechanism.value) {
+      alert('Please select the release mechanism.');
+      return;
+    }
+    if (!form.excipientMode.value) {
+      alert('Please select excipient selection mode.');
+      return;
+    }
 
+    // Collect excipients
+    let excipients = [];
+    if (form.excipientMode.value === 'manual') {
+      const excipientNames = excipientContainer.querySelectorAll('input[name="excipientName"]');
+      const excipientWeights = excipientContainer.querySelectorAll('input[name="excipientWeight"]');
+      if (excipientNames.length === 0) {
+        alert('Please add at least one excipient.');
+        return;
+      }
       for (let i = 0; i < excipientNames.length; i++) {
         const name = excipientNames[i].value.trim();
         const weight = parseFloat(excipientWeights[i].value);
-        if (!name || isNaN(weight) || weight < 0) {
-          alert('الرجاء إدخال أسماء وكمية المواد المضافة بشكل صحيح.');
+        if (!name) {
+          alert('Please enter all excipient names.');
+          return;
+        }
+        if (isNaN(weight) || weight < 0) {
+          alert('Please enter valid excipient weights.');
           return;
         }
         excipients.push({ name, weight });
       }
     } else {
-      // الوضع الآلي: نستخدم مثال مواد مضافة ثابتة (يمكن تطويره لاحقًا)
+      // Automatic excipients - example logic: choose 3 default excipients with weights based on active concentration
       excipients = [
-        { name: 'مادة مضافة 1', weight: 10 },
-        { name: 'مادة مضافة 2', weight: 5 }
+        { name: 'Excipient A', weight: activeConcentration * 0.2 },
+        { name: 'Excipient B', weight: activeConcentration * 0.15 },
+        { name: 'Excipient C', weight: activeConcentration * 0.1 }
       ];
     }
 
-    // الحساب: جمع الكميات
-    const totalWeight = activeConc + excipients.reduce((acc, x) => acc + x.weight, 0);
+    // Calculate total weight = active + excipients weights
+    const totalWeight = activeConcentration + excipients.reduce((acc, e) => acc + e.weight, 0);
 
-    // تحضير الجدول
-    resultsTableBody.innerHTML = '';
-    // المادة الفعالة
-    resultsTableBody.innerHTML += `<tr>
-      <td>${activeName} (Active)</td>
-      <td>${activeConc.toFixed(2)}</td>
-      <td>${((activeConc / totalWeight) * 100).toFixed(2)}</td>
-    </tr>`;
-    // المواد المضافة
-    excipients.forEach(({ name, weight }) => {
-      resultsTableBody.innerHTML += `<tr>
-        <td>${name}</td>
-        <td>${weight.toFixed(2)}</td>
-        <td>${((weight / totalWeight) * 100).toFixed(2)}</td>
-      </tr>`;
+    // Prepare data for results and chart
+    const results = [];
+    results.push({
+      name: activeName,
+      weight: activeConcentration,
+      percentage: (activeConcentration / totalWeight) * 100
     });
 
+    excipients.forEach(e => {
+      results.push({
+        name: e.name,
+        weight: e.weight,
+        percentage: (e.weight / totalWeight) * 100
+      });
+    });
+
+    // Render results table
+    results.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${item.name}</td>
+        <td>${item.weight.toFixed(2)}</td>
+        <td>${item.percentage.toFixed(2)}</td>
+      `;
+      resultsTableBody.appendChild(tr);
+    });
+
+    // Show results section
     resultsSection.style.display = 'block';
 
-    // رسم المخطط الدائري
-    if (chart) chart.destroy();
+    // Render pie chart
+    const labels = results.map(r => r.name);
+    const data = results.map(r => r.percentage);
 
     chart = new Chart(ctx, {
       type: 'pie',
       data: {
-        labels: [activeName, ...excipients.map(x => x.name)],
+        labels: labels,
         datasets: [{
-          data: [activeConc, ...excipients.map(x => x.weight)],
+          data: data,
           backgroundColor: [
-            '#007BFF', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#17a2b8', '#fd7e14', '#20c997'
+            '#007BFF', '#28A745', '#FFC107', '#DC3545', '#6F42C1',
+            '#17A2B8', '#FD7E14', '#20C997', '#6610F2', '#E83E8C'
           ],
-        }]
+        }],
       },
       options: {
         responsive: true,
         plugins: {
-          legend: {
-            position: 'bottom'
-          }
-        }
+          legend: { position: 'bottom' },
+        },
       }
     });
 
-    // هنا يمكن وضع منطق اختيار التركيبة المثالية مستقبلاً
   });
 });

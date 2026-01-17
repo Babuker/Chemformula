@@ -1,87 +1,73 @@
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('chemForm');
-  const ingredientsContainer = document.getElementById('ingredientsContainer');
-  const addIngredientBtn = document.getElementById('addIngredientBtn');
-  const totalPercentageEl = document.getElementById('totalPercentage');
+  const resultsSection = document.getElementById('results-section');
+  const formulationResults = document.getElementById('formulationResults');
   const ctx = document.getElementById('formulationChart').getContext('2d');
   let chart = null;
 
-  // Add new ingredient row
-  addIngredientBtn.addEventListener('click', () => {
-    const row = document.createElement('div');
-    row.className = 'ingredient-row';
-    row.innerHTML = `
-      <input type="text" name="ingredientName" placeholder="Ingredient Name" required/>
-      <input type="number" name="ingredientWeight" placeholder="Weight" min="0" step="any" required/>
-      <button type="button" class="removeIngredientBtn">Remove</button>
-    `;
-    ingredientsContainer.appendChild(row);
-  });
-
-  // Remove ingredient row
-  ingredientsContainer.addEventListener('click', (e) => {
-    if (e.target.classList.contains('removeIngredientBtn')) {
-      e.target.parentElement.remove();
-    }
-  });
-
-  // Form submit handler
   form.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    const totalWeight = parseFloat(form.totalWeight.value);
-    if (isNaN(totalWeight) || totalWeight <= 0) {
-      alert('Please enter a valid total weight.');
+    // جمع البيانات
+    const activeName = form.activeName.value.trim();
+    const activeConc = parseFloat(form.activeConcentration.value);
+    const dosageForm = form.dosageForm.value;
+    const inputMethod = form.inputMethod.value;
+    const referenceStandard = form.referenceStandard.value;
+
+    if (!activeName || isNaN(activeConc) || activeConc <= 0 || !dosageForm) {
+      alert('Please fill all required fields correctly.');
       return;
     }
 
-    const weightInputType = form.weightInputType.value;
-    const ingredients = [];
+    // نموذج بسيط لتحديد المواد المضافة (excipients) بناءً على الشكل الدوائي
+    const excipientsOptions = {
+      tablet: [
+        { name: 'Lactose', percent: 30 },
+        { name: 'Microcrystalline Cellulose', percent: 40 },
+        { name: 'Magnesium Stearate', percent: 5 },
+        { name: 'Povidone', percent: 5 }
+      ],
+      syrup: [
+        { name: 'Sucrose', percent: 60 },
+        { name: 'Preservative', percent: 10 },
+        { name: 'Flavor', percent: 10 },
+        { name: 'Water', percent: 20 }
+      ],
+      capsule: [
+        { name: 'Gelatin', percent: 50 },
+        { name: 'Starch', percent: 30 },
+        { name: 'Magnesium Stearate', percent: 10 },
+        { name: 'Silica', percent: 10 }
+      ],
+      injection: [
+        { name: 'Sterile Water', percent: 85 },
+        { name: 'Buffer Solution', percent: 10 },
+        { name: 'Preservative', percent: 5 }
+      ]
+    };
 
-    // Collect ingredients
-    const ingredientNames = form.querySelectorAll('input[name="ingredientName"]');
-    const ingredientWeights = form.querySelectorAll('input[name="ingredientWeight"]');
+    const excipients = excipientsOptions[dosageForm] || [];
 
-    for (let i = 0; i < ingredientNames.length; i++) {
-      const name = ingredientNames[i].value.trim();
-      const weight = parseFloat(ingredientWeights[i].value);
+    // التركيبة النهائية مع المادة الفعالة
+    const totalPercentExcipients = excipients.reduce((sum, e) => sum + e.percent, 0);
+    const activePercent = 100 - totalPercentExcipients;
 
-      if (!name) {
-        alert('Please enter all ingredient names.');
-        return;
-      }
-      if (isNaN(weight) || weight < 0) {
-        alert('Please enter valid weights.');
-        return;
-      }
-      ingredients.push({ name, weight });
-    }
+    // تحضير بيانات العرض
+    const labels = [activeName, ...excipients.map(e => e.name)];
+    const data = [activePercent, ...excipients.map(e => e.percent)];
 
-    // Calculate total ingredient weight sum
-    let totalIngredientWeight = ingredients.reduce((acc, ing) => acc + ing.weight, 0);
+    // عرض النتيجة النصية
+    formulationResults.innerHTML = `
+      <p>Formulation for <strong>${activeName}</strong> (${activeConc} mg per unit), Dosage Form: <strong>${dosageForm}</strong>, Reference: <strong>${referenceStandard}</strong>.</p>
+      <p>Active Ingredient Percentage: <strong>${activePercent.toFixed(2)}%</strong></p>
+      <p>Excipients and their percentages:</p>
+      <ul>
+        ${excipients.map(e => `<li>${e.name}: ${e.percent}%</li>`).join('')}
+      </ul>
+    `;
 
-    // Auto adjust total weight if needed
-    let finalTotalWeight = totalWeight;
-    if (weightInputType === 'auto') {
-      finalTotalWeight = totalIngredientWeight;
-    }
-
-    // Calculate percentages and verify sum
-    let totalPercent = 0;
-    const labels = [];
-    const data = [];
-
-    ingredients.forEach((ing) => {
-      const percent = (ing.weight / finalTotalWeight) * 100;
-      totalPercent += percent;
-      labels.push(ing.name);
-      data.push(parseFloat(percent.toFixed(2)));
-    });
-
-    // Display total percent sum (should be close to 100)
-    totalPercentageEl.textContent = `Total Percentage: ${totalPercent.toFixed(2)}%`;
-
-    // Render pie chart
+    // عرض الرسم البياني الدائري
     if (chart) {
       chart.destroy();
     }
@@ -95,16 +81,17 @@ document.addEventListener('DOMContentLoaded', () => {
             '#007BFF', '#28A745', '#FFC107', '#DC3545', '#6F42C1',
             '#17A2B8', '#FD7E14', '#20C997', '#6610F2', '#E83E8C'
           ],
-        }],
+        }]
       },
       options: {
         responsive: true,
         plugins: {
-          legend: {
-            position: 'bottom',
-          }
+          legend: { position: 'bottom' }
         }
-      },
+      }
     });
+
+    resultsSection.style.display = 'block';
+    resultsSection.scrollIntoView({behavior: "smooth"});
   });
 });

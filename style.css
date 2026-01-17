@@ -1,254 +1,95 @@
-/* =====================================================
-   ChemFormula® – Global UI Stylesheet
-   Version: 2.0
-   ===================================================== */
-
-/* ========== CSS Reset ========== */
+/* Basic Reset and Fonts */
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
-
-:root {
-  --primary: #2563eb;
-  --primary-dark: #1e40af;
-  --secondary: #64748b;
-  --success: #047857;
-  --danger: #b91c1c;
-  --bg: #f6f8fb;
-  --card: #ffffff;
-  --border: #e5e7eb;
-  --text: #1f2937;
-  --muted: #6b7280;
-  --radius: 14px;
-  --shadow: 0 12px 30px rgba(0,0,0,.08);
-}
-
-/* ========== Base ========== */
-html {
-  scroll-behavior: smooth;
-}
-
 body {
-  font-family: "Segoe UI", Roboto, Arial, Helvetica, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
-}
-
-/* ========== Header ========== */
-header {
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  color: #fff;
-  padding: 18px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: var(--shadow);
-}
-
-header h1 {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: .5px;
-}
-
-header .badge {
-  background: rgba(255,255,255,.15);
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  margin-left: 8px;
-}
-
-/* Language selector */
-header select {
-  background: rgba(255,255,255,.15);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,.3);
-  padding: 6px 10px;
-  border-radius: 10px;
-  font-weight: 600;
-}
-
-header select option {
-  color: #000;
-}
-
-/* ========== Layout ========== */
-main {
-  max-width: 1200px;
-  margin: 24px auto;
-  padding: 0 16px;
-}
-
-.card {
-  background: var(--card);
-  border-radius: var(--radius);
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f4f6f8;
+  color: #333;
   padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: var(--shadow);
 }
 
-.card h2 {
-  font-size: 18px;
-  font-weight: 800;
-  margin-bottom: 14px;
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+h1 {
+  color: #007BFF;
+  margin: 0;
+}
+h2 {
+  color: #0056b3;
 }
 
-/* ========== Grid & Forms ========== */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 14px;
+form {
+  background: #fff;
+  padding: 20px;
+  border-radius: 6px;
+  max-width: 600px;
+  margin: 0 auto 40px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 label {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text);
-}
-
-input,
-select,
-button {
-  width: 100%;
-  margin-top: 6px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  font-size: 14px;
-}
-
-input:focus,
-select:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
-}
-
-/* ========== Buttons ========== */
-button {
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  font-weight: 800;
-  cursor: pointer;
-  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
-}
-
-button:hover {
-  background: var(--primary-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0,0,0,.15);
-}
-
-button.secondary {
-  background: var(--secondary);
-}
-
-button.secondary:hover {
-  background: #475569;
-}
-
-/* ========== Table ========== */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 14px;
-}
-
-th,
-td {
-  border: 1px solid var(--border);
-  padding: 10px;
-  text-align: center;
-  font-size: 14px;
-}
-
-th {
-  background: #f1f5f9;
-  font-weight: 800;
-}
-
-tbody tr:hover {
-  background: #f8fafc;
-}
-
-/* ========== Status Messages ========== */
-.ok {
-  margin-top: 10px;
-  color: var(--success);
-  font-weight: 800;
-}
-
-.error {
-  margin-top: 10px;
-  color: var(--danger);
-  font-weight: 800;
-}
-
-/* ========== Badges & Notes ========== */
-.badge {
-  display: inline-block;
-  background: #e5f0ff;
-  color: var(--primary-dark);
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  margin-top: 8px;
-}
-
-/* ========== Chart ========== */
-canvas {
-  max-width: 520px;
-  margin: 0 auto;
   display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
 }
 
-/* ========== Footer ========== */
-footer {
-  margin-top: 40px;
+input[type="text"], input[type="number"], select {
+  width: calc(100% - 20px);
+  padding: 8px 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  background-color: #007BFF;
+  border: none;
+  color: white;
+  padding: 10px 18px;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+button:hover {
+  background-color: #0056b3;
+}
+
+.ingredient-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+.ingredient-row input[type="text"] {
+  flex: 2;
+}
+.ingredient-row input[type="number"] {
+  flex: 1;
+}
+.removeIngredientBtn {
+  background: #dc3545;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+}
+.removeIngredientBtn:hover {
+  background: #b02a37;
+}
+
+#results-section {
+  max-width: 600px;
+  margin: 0 auto;
+  background: #fff;
   padding: 20px;
-  text-align: center;
-  color: var(--muted);
-  font-size: 13px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-footer a {
-  color: var(--primary);
-  text-decoration: none;
-  font-weight: 700;
-}
-
-footer a:hover {
-  text-decoration: underline;
-}
-
-/* ========== RTL Support (Arabic) ========== */
-html[lang="ar"] body {
-  direction: rtl;
-  text-align: right;
-}
-
-html[lang="ar"] header {
-  flex-direction: row-reverse;
-}
-
-html[lang="ar"] table th,
-html[lang="ar"] table td {
-  text-align: center;
-}
-
-/* ========== Responsive ========== */
-@media (max-width: 600px) {
-  header h1 {
-    font-size: 18px;
-  }
-
-  .card {
-    padding: 16px;
-  }
+#totalPercentage {
+  font-weight: bold;
+  margin-bottom: 15px;
 }

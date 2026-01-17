@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ChemFormula™ | Professional Formulation Software</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+<header><h1>ChemFormula™</h1><p>Global Chemical Formulation Software</p></header>
+<main>
+<section><h2>Active Ingredient (Manual)</h2><input id="aiName"><input id="aiWeight" type="number"></section>
+<section><h2>Total Weight</h2><input id="totalWeight" type="number"></section>
+<section><table><tbody id="materials"></tbody></table><button id="addMaterial">Add</button></section>
+<button id="exportPDF">Export PDF</button>
+<p id="status"></p>
+<canvas id="chart"></canvas>
+</main>
+<footer><a href="legal/terms.html">Terms</a></footer>
+<script src="script.js"></script>
+</body>
+</html>

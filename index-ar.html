@@ -1,115 +1,120 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ChemFormula® | أداة متقدمة لصياغة التركيبات الكيميائية</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>برنامج تصميم التركيبة الكيميائية</title>
 
-  <link rel="stylesheet" href="style.css" />
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- CSS -->
+<link rel="stylesheet" href="style.css">
+
+<!-- Charts & PDF -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+body { font-family: Arial, sans-serif; background:#f7f7fb; }
+header { background:#3949ab;color:#fff;padding:15px; }
+.container { max-width:1200px;margin:auto;padding:20px; }
+.section { background:#fff;padding:20px;border-radius:8px;margin-bottom:20px; }
+label { font-weight:600; }
+input, select, textarea { width:100%; padding:8px; margin-top:5px; }
+button { background:#3949ab;color:#fff;border:none;padding:10px 15px;cursor:pointer }
+table { width:100%;border-collapse:collapse;margin-top:15px }
+th,td { border:1px solid #ddd;padding:8px;text-align:center }
+</style>
 </head>
+
 <body>
 
-  <h1>كيمفورمولا®</h1>
-  <h2>أداة متقدمة لصياغة التركيبات الكيميائية</h2>
+<header>
+  <h1><i class="fas fa-atom"></i> برنامج تصميم التركيبة الكيميائية</h1>
+  <button onclick="switchLang('en')" style="float:left;background:#fff;color:#3949ab">EN</button>
+</header>
 
-  <form id="formulationForm">
+<div class="container">
 
-    <!-- Step 1 -->
-    <div class="step">
-      <label for="activeName">1. اسم المادة الفعالة</label>
-      <input type="text" id="activeName" name="activeName" placeholder="ادخل اسم المادة الفعالة" required />
-      <label for="activeConcentration">تركيز المادة الفعالة (ملجم)</label>
-      <input type="number" id="activeConcentration" name="activeConcentration" placeholder="مثلاً 250" min="0" step="any" required />
-    </div>
+<!-- FORM -->
+<section class="section">
+<h2><i class="fas fa-sliders-h"></i> إعدادات التصميم</h2>
 
-    <!-- Step 2 -->
-    <div class="step">
-      <label>2. نوع الدستور المرجع</label>
-      <div class="inline-radio-group">
-        <label><input type="radio" name="standardType" value="BP" required /> BP</label>
-        <label><input type="radio" name="standardType" value="USP" /> USP</label>
-      </div>
-    </div>
+<form id="formulaForm">
 
-    <!-- Step 3 -->
-    <div class="step">
-      <label>3. الشكل المطلوب</label>
-      <select id="dosageForm" name="dosageForm" required>
-        <option value="" disabled selected>اختر الشكل</option>
-        <option value="tablet">قرص</option>
-        <option value="liquid">شراب سائل</option>
-        <option value="powder">بودرة جافة</option>
-      </select>
-    </div>
+<label>الهدف الأساسي</label>
+<select id="primaryGoal">
+  <option value="min-cost">أقل تكلفة</option>
+  <option value="balanced" selected>توازن تكلفة / جودة</option>
+  <option value="max-performance">أعلى أداء</option>
+  <option value="fast-production">سرعة إنتاج</option>
+  <option value="eco-friendly">صديق للبيئة</option>
+</select>
 
-    <!-- Step 4 -->
-    <div class="step">
-      <label>4. أساس إنشاء التركيبة</label>
-      <select id="formulationBasis" name="formulationBasis" required>
-        <option value="" disabled selected>اختر الأساس</option>
-        <option value="balance">توازن الجودة والتكلفة</option>
-        <option value="quality">الجودة فقط</option>
-        <option value="cost">التكلفة فقط</option>
-      </select>
-    </div>
+<hr>
 
-    <!-- Step 5 -->
-    <div class="step">
-      <label>5. طريقة تحرر المادة الفعالة</label>
-      <select id="releaseMechanism" name="releaseMechanism" required>
-        <option value="" disabled selected>اختر الطريقة</option>
-        <option value="immediate">تحرر مباشر</option>
-        <option value="sustained">تحرر مطوّل</option>
-        <option value="delayed">تحرر متأخر</option>
-      </select>
-    </div>
+<label><i class="fas fa-weight"></i> وزن الوحدة</label><br>
+<label><input type="radio" name="weightMode" value="manual" checked> يدوي</label>
+<label style="margin-right:15px">
+  <input type="radio" name="weightMode" value="auto"> آلي (مرتبط بالهدف)
+</label>
 
-    <!-- Step 6 -->
-    <div class="step">
-      <label>6. اختيار أسماء المواد المضافة</label>
-      <div class="inline-radio-group">
-        <label><input type="radio" name="excipientMode" value="manual" required /> يدويًا</label>
-        <label><input type="radio" name="excipientMode" value="auto" /> آليًا</label>
-      </div>
-    </div>
+<input type="number" id="totalWeight" value="1000" min="100" step="10">
 
-    <!-- Step 7 -->
-    <div class="step" id="excipientNamesSection" style="display:none;">
-      <label>7. تحديد أسماء المواد المضافة</label>
-      <div id="excipientContainer">
-        <div class="excipient-row">
-          <input type="text" name="excipientName" placeholder="اسم المادة المضافة" required />
-          <input type="number" name="excipientWeight" placeholder="الكمية (بالملجم)" min="0" step="any" required />
-          <button type="button" class="removeExcipientBtn">حذف</button>
-        </div>
-      </div>
-      <button type="button" id="addExcipientBtn">إضافة مادة مضافة</button>
-    </div>
+<small id="autoWeightHint" style="display:none;color:#388e3c">
+  يتم حساب الوزن تلقائيًا حسب الهدف الأساسي
+</small>
 
-    <button type="submit">احسب التركيبة المثالية</button>
-  </form>
+<hr>
 
-  <!-- Results -->
-  <section id="results" style="display:none;">
-    <h2>النتائج</h2>
-    <table id="resultsTable">
-      <thead>
-        <tr>
-          <th>اسم المادة</th>
-          <th>الكمية (ملجم)</th>
-          <th>النسبة المئوية (%)</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <div id="chartContainer">
-      <canvas id="formulationChart"></canvas>
-    </div>
-  </section>
+<button type="submit">
+  <i class="fas fa-calculator"></i> تصميم التركيبة
+</button>
 
-  <script src="script.js"></script>
+</form>
+</section>
+
+<!-- RESULTS -->
+<section class="section" id="resultsContent" style="display:none">
+
+<h2><i class="fas fa-chart-pie"></i> النتائج</h2>
+
+<p>
+<i class="fas fa-calendar"></i>
+تاريخ التصميم: <strong><span id="designDate"></span></strong>
+</p>
+
+<table id="formulaTable">
+<thead>
+<tr>
+  <th>المادة</th>
+  <th>النسبة / الكمية</th>
+  <th>الوظيفة</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<div id="performanceMetrics" style="margin-top:20px"></div>
+
+<div style="margin-top:20px">
+<button onclick="exportResults()">
+  <i class="fas fa-file-pdf"></i> تصدير PDF
+</button>
+</div>
+
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:15px;color:#666">
+© 2026 – برنامج تصميم التركيبة الكيميائية
+</footer>
+
+<!-- JS -->
+<script src="i18n.js"></script>
+<script src="script.js"></script>
+
 </body>
 </html>

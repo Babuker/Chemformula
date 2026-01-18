@@ -1,115 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ChemFormula® | Advanced Chemical Formulation Tool</title>
+<div class="form-group">
+  <label><i class="fas fa-weight"></i> وزن / حجم الوحدة</label>
 
-  <link rel="stylesheet" href="style.css" />
+  <div style="display:flex; gap:10px; margin-bottom:10px;">
+    <label>
+      <input type="radio" name="weightMode" value="manual" checked>
+      يدوي
+    </label>
+    <label>
+      <input type="radio" name="weightMode" value="auto">
+      آلي (حسب الهدف الأساسي)
+    </label>
+  </div>
 
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
+  <div class="input-with-unit">
+    <input type="number" id="totalWeight" value="1000" min="100" step="10">
+    <div class="unit">مجم</div>
+  </div>
 
-  <h1>ChemFormula®</h1>
-  <h2>Advanced Chemical Formulation Tool</h2>
-
-  <form id="formulationForm">
-
-    <!-- Step 1 -->
-    <div class="step">
-      <label for="activeName">1. Active Ingredient Name</label>
-      <input type="text" id="activeName" name="activeName" placeholder="Enter active ingredient name" required />
-      <label for="activeConcentration">Active Ingredient Concentration (mg)</label>
-      <input type="number" id="activeConcentration" name="activeConcentration" placeholder="e.g., 250" min="0" step="any" required />
-    </div>
-
-    <!-- Step 2 -->
-    <div class="step">
-      <label>2. Reference Standard</label>
-      <div class="inline-radio-group">
-        <label><input type="radio" name="standardType" value="BP" required /> BP</label>
-        <label><input type="radio" name="standardType" value="USP" /> USP</label>
-      </div>
-    </div>
-
-    <!-- Step 3 -->
-    <div class="step">
-      <label>3. Dosage Form</label>
-      <select id="dosageForm" name="dosageForm" required>
-        <option value="" disabled selected>Select form</option>
-        <option value="tablet">Tablet</option>
-        <option value="liquid">Liquid Syrup</option>
-        <option value="powder">Dry Powder</option>
-      </select>
-    </div>
-
-    <!-- Step 4 -->
-    <div class="step">
-      <label>4. Formulation Basis</label>
-      <select id="formulationBasis" name="formulationBasis" required>
-        <option value="" disabled selected>Select basis</option>
-        <option value="balance">Balance Quality & Cost</option>
-        <option value="quality">Quality Only</option>
-        <option value="cost">Cost Only</option>
-      </select>
-    </div>
-
-    <!-- Step 5 -->
-    <div class="step">
-      <label>5. Active Ingredient Release Mechanism</label>
-      <select id="releaseMechanism" name="releaseMechanism" required>
-        <option value="" disabled selected>Select mechanism</option>
-        <option value="immediate">Immediate Release</option>
-        <option value="sustained">Sustained Release</option>
-        <option value="delayed">Delayed Release</option>
-      </select>
-    </div>
-
-    <!-- Step 6 -->
-    <div class="step">
-      <label>6. Excipients Selection Mode</label>
-      <div class="inline-radio-group">
-        <label><input type="radio" name="excipientMode" value="manual" required /> Manual</label>
-        <label><input type="radio" name="excipientMode" value="auto" /> Automatic</label>
-      </div>
-    </div>
-
-    <!-- Step 7 -->
-    <div class="step" id="excipientNamesSection" style="display:none;">
-      <label>7. Specify Excipients Names</label>
-      <div id="excipientContainer">
-        <div class="excipient-row">
-          <input type="text" name="excipientName" placeholder="Excipient name" required />
-          <input type="number" name="excipientWeight" placeholder="Weight (mg)" min="0" step="any" required />
-          <button type="button" class="removeExcipientBtn">Remove</button>
-        </div>
-      </div>
-      <button type="button" id="addExcipientBtn">Add Excipient</button>
-    </div>
-
-    <button type="submit">Calculate Ideal Formulation</button>
-  </form>
-
-  <!-- Results -->
-  <section id="results" style="display:none;">
-    <h2>Results</h2>
-    <table id="resultsTable">
-      <thead>
-        <tr>
-          <th>Ingredient Name</th>
-          <th>Weight (mg)</th>
-          <th>Percentage (%)</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <div id="chartContainer">
-      <canvas id="formulationChart"></canvas>
-    </div>
-  </section>
-
-  <script src="script.js"></script>
-</body>
-</html>
+  <small id="autoWeightHint" style="display:none;color:#388e3c;">
+    يتم حساب الوزن تلقائيًا بناءً على الهدف الأساسي
+  </small>
+</div>

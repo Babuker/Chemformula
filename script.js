@@ -1,116 +1,149 @@
-let chart;
+/* ================================
+   ChemFormula® Core Logic
+   Global – Logical – GitHub Ready
+================================ */
 
-const excipients = {
+const excipientLibrary = {
   tablet: [
-    { name: "MCC", function: "Diluent", min: 20 },
-    { name: "PVP", function: "Binder", min: 3 },
-    { name: "Croscarmellose", function: "Disintegrant", min: 2 },
-    { name: "Magnesium Stearate", function: "Lubricant", min: 0.5 }
+    { name: "Microcrystalline Cellulose", func: "Diluent", min: 20, max: 40 },
+    { name: "Lactose Monohydrate", func: "Diluent", min: 10, max: 30 },
+    { name: "Povidone K30", func: "Binder", min: 2, max: 6 },
+    { name: "Croscarmellose Sodium", func: "Disintegrant", min: 2, max: 5 },
+    { name: "Magnesium Stearate", func: "Lubricant", min: 0.5, max: 1.5 }
   ],
   capsule: [
-    { name: "Lactose", function: "Filler", min: 30 },
-    { name: "Talc", function: "Glidant", min: 1 }
+    { name: "Lactose Monohydrate", func: "Diluent", min: 30, max: 60 },
+    { name: "Microcrystalline Cellulose", func: "Diluent", min: 10, max: 30 },
+    { name: "Magnesium Stearate", func: "Lubricant", min: 0.5, max: 1.0 }
   ],
   liquid: [
-    { name: "Purified Water", function: "Solvent", min: 70 },
-    { name: "Sodium Benzoate", function: "Preservative", min: 0.1 }
+    { name: "Purified Water", func: "Solvent", min: 60, max: 80 },
+    { name: "Glycerin", func: "Co-solvent", min: 5, max: 15 },
+    { name: "Sodium Benzoate", func: "Preservative", min: 0.1, max: 0.2 }
   ],
-  dry_syrup: [
-    { name: "Sucrose", function: "Diluent", min: 60 },
-    { name: "Flavor", function: "Flavoring", min: 0.2 }
+  drySyrup: [
+    { name: "Sucrose", func: "Diluent", min: 60, max: 80 },
+    { name: "Xanthan Gum", func: "Suspending Agent", min: 0.2, max: 0.5 }
   ]
 };
 
-function runFormulation() {
+/* ================================
+   Main Calculation Engine
+================================ */
 
-  const apiDose = Number(apiDoseInput().value);
-  const form = dosageFormInput().value;
-  const batchSize = Number(batchSizeInput().value);
+function calculateFormula() {
+  const apiName = document.getElementById("apiName").value;
+  const apiMg = parseFloat(document.getElementById("apiMg").value);
+  const dosageForm = document.getElementById("dosageForm").value;
+  const batchSize = parseInt(document.getElementById("batchSize").value);
 
-  if (apiDose <= 0 || apiDose >= 100) {
-    alert("API dose must be between 0 and 100%");
+  if (!apiName || !apiMg || !batchSize) {
+    alert("Please complete all required fields.");
     return;
   }
 
-  const excList = excipients[form];
-  let remaining = 100 - apiDose;
+  const unitWeightMg = apiMg * 5; 
+  const apiPercent = (apiMg / unitWeightMg) * 100;
+  let remainingPercent = 100 - apiPercent;
 
-  let tbody = document.querySelector("#resultTable tbody");
-  tbody.innerHTML = "";
+  const excipients = excipientLibrary[dosageForm];
+  let results = [];
+  let usedPercent = 0;
 
-  let labels = ["API"];
-  let data = [apiDose];
-
-  excList.forEach((e, i) => {
-
+  excipients.forEach((exc, index) => {
     let percent;
-
-    if (i === excList.length - 1) {
-      percent = remaining;
+    if (index === excipients.length - 1) {
+      percent = remainingPercent - usedPercent;
     } else {
-      percent = e.min;
-      remaining -= percent;
+      percent =
+        Math.min(
+          exc.max,
+          Math.max(exc.min, remainingPercent / excipients.length)
+        );
+      usedPercent += percent;
     }
 
-    if (percent < 0) percent = 0;
-
-    tbody.innerHTML += `
-      <tr>
-        <td>${e.name}</td>
-        <td>${e.function}</td>
-        <td>${percent.toFixed(2)}%</td>
-      </tr>
-    `;
-
-    labels.push(e.name);
-    data.push(percent);
+    results.push({
+      name: exc.name,
+      func: exc.func,
+      percent: percent.toFixed(2),
+      mg: ((percent / 100) * unitWeightMg).toFixed(2)
+    });
   });
 
-  tbody.innerHTML += `
+  renderResults(apiName, apiPercent, apiMg, results, unitWeightMg, batchSize, dosageForm);
+}
+
+/* ================================
+   Render Output
+================================ */
+
+function renderResults(apiName, apiPercent, apiMg, excipients, unitWeightMg, batchSize, dosageForm) {
+  let table = `
+  <table>
     <tr>
-      <td><b>API</b></td>
-      <td>Active</td>
-      <td>${apiDose.toFixed(2)}%</td>
+      <th>Material</th>
+      <th>Function</th>
+      <th>% w/w</th>
+      <th>mg / unit</th>
+    </tr>
+    <tr>
+      <td>${apiName}</td>
+      <td>Active Ingredient</td>
+      <td>${apiPercent.toFixed(2)}</td>
+      <td>${apiMg}</td>
     </tr>
   `;
 
-  document.getElementById("results").classList.remove("hidden");
-
-  if (chart) chart.destroy();
-
-  chart = new Chart(document.getElementById("pieChart"), {
-    type: "pie",
-    data: { labels, datasets: [{ data }] }
+  excipients.forEach(e => {
+    table += `
+      <tr>
+        <td>${e.name}</td>
+        <td>${e.func}</td>
+        <td>${e.percent}</td>
+        <td>${e.mg}</td>
+      </tr>`;
   });
 
-  document.getElementById("batchInfo").innerHTML = `
-    <h3>Batch Information</h3>
-    <p>Batch size: ${batchSize} units</p>
-    <p>Estimated storage volume: ${(batchSize * 0.000001).toFixed(3)} m³</p>
-    <p>Pallets required: ${Math.ceil(batchSize / 50000)}</p>
-  `;
+  table += "</table>";
+  document.getElementById("results").innerHTML = table;
 
-  document.getElementById("recommendations").innerHTML = `
-    <h3>Recommendations</h3>
+  renderRecommendations(dosageForm);
+}
+
+/* ================================
+   Dynamic Recommendations
+================================ */
+
+function renderRecommendations(form) {
+  let rec = "";
+
+  if (form === "tablet") {
+    rec = `
     <ul>
-      <li>Storage temperature: below 25°C</li>
-      <li>Relative humidity: below 60%</li>
-      <li>Manufacturing method: ${form === "tablet" ? "Direct Compression" : "Standard Mixing"}</li>
-      <li>Packaging: ${form === "liquid" ? "HDPE Bottle" : "Blister"}</li>
-    </ul>
-  `;
+      <li>Manufacturing: Wet granulation recommended</li>
+      <li>Packaging: Blister (Alu-PVC)</li>
+      <li>Storage: 25°C / ≤60% RH</li>
+    </ul>`;
+  }
+
+  if (form === "capsule") {
+    rec = `
+    <ul>
+      <li>Manufacturing: Direct blending</li>
+      <li>Packaging: HDPE Bottle</li>
+      <li>Storage: 25°C / dry place</li>
+    </ul>`;
+  }
+
+  if (form === "liquid") {
+    rec = `
+    <ul>
+      <li>Manufacturing: Solution with controlled mixing</li>
+      <li>Packaging: Amber bottle</li>
+      <li>Storage: 15–25°C</li>
+    </ul>`;
+  }
+
+  document.getElementById("recommendations").innerHTML = rec;
 }
-
-function exportPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  doc.text("ChemFormula® – Formulation Report", 10, 10);
-  doc.text(document.getElementById("results").innerText, 10, 20);
-
-  doc.save("ChemFormula_Report.pdf");
-}
-
-function apiDoseInput(){ return document.getElementById("apiDose"); }
-function dosageFormInput(){ return document.getElementById("dosageForm"); }
-function batchSizeInput(){ return document.getElementById("batchSize"); }

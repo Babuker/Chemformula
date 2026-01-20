@@ -3,21 +3,16 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ChemFormula® | Global Chemical Formulation Tool</title>
-
-<meta name="description" content="Professional chemical formulation optimizer with batch info, multilingual support, and visual analytics." />
-<meta name="author" content="ChemFormula®" />
-<meta name="robots" content="index, follow" />
-
+<title>ChemFormula® - Chemical Formulation Optimizer</title>
+<meta name="description" content="Professional chemical formulation optimizer." />
 <link rel="stylesheet" href="style.css" />
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode/dist/JsBarcode.all.min.js"></script>
 </head>
 <body>
 <header>
-  <h1>ChemFormula®</h1>
-  <div class="lang-switcher">
+  <h1>ChemFormula® - Chemical Formulation Optimizer</h1>
+  <div id="langSwitch">
     <label for="langSelect">Language:</label>
     <select id="langSelect">
       <option value="en" selected>English</option>
@@ -27,86 +22,71 @@
 </header>
 
 <main>
-  <section id="step1">
-    <h2>Step 1: Active Ingredient Name and Amount (mg per unit)</h2>
+  <section id="inputs">
+    <h2>Step 1: Active Ingredient & Amount</h2>
     <input type="text" id="apiName" placeholder="Active Ingredient Name" />
-    <input type="number" id="apiAmount" placeholder="Amount (mg)" min="0" step="0.01" />
-  </section>
+    <input type="number" id="apiAmount" placeholder="Amount (mg)" min="0" />
 
-  <section id="step2">
     <h2>Step 2: Reference Standard</h2>
-    <select id="reference">
-      <option value="" disabled selected>Select Reference</option>
+    <select id="referenceStandard">
       <option value="USP">USP</option>
       <option value="BP">BP</option>
       <option value="EUP">EUP</option>
     </select>
-  </section>
 
-  <section id="step3">
     <h2>Step 3: Dosage Form</h2>
     <select id="dosageForm">
-      <option value="" disabled selected>Select Dosage Form</option>
       <option value="Tablet">Tablet</option>
-      <option value="Liquid">Liquid</option>
-      <option value="Powder">Powder</option>
+      <option value="Coated Tablet">Coated Tablet</option>
+      <option value="Liquid Syrup">Liquid Syrup</option>
+      <option value="Dry Syrup">Dry Syrup</option>
+      <option value="Capsule">Capsule</option>
     </select>
-  </section>
 
-  <section id="step4">
     <h2>Step 4: Formulation Goal</h2>
     <select id="formulationGoal">
-      <option value="" disabled selected>Select Formulation Goal</option>
-      <option value="Balanced">Balanced (Quality & Cost)</option>
-      <option value="Quality">Quality Only</option>
-      <option value="Cost">Cost Only</option>
+      <option value="Quality & Cost">Balance Quality & Cost</option>
+      <option value="Quality Only">Quality Only</option>
+      <option value="Cost Only">Cost Only</option>
     </select>
-  </section>
 
-  <section id="step5">
-    <h2>Step 5: Release Method</h2>
-    <select id="releaseMethod">
-      <option value="" disabled selected>Select Release Method</option>
+    <h2>Step 5: Release Mechanism</h2>
+    <select id="releaseMechanism">
       <option value="Immediate">Immediate Release</option>
       <option value="Sustained">Sustained Release</option>
-      <option value="Controlled">Controlled Release</option>
+      <option value="Delayed">Delayed Release</option>
     </select>
-  </section>
 
-  <section id="step6">
-    <h2>Step 6: Excipient Input Mode</h2>
-    <select id="excipientMode">
+    <h2>Step 6: Excipients Selection Mode</h2>
+    <select id="excipientsMode">
       <option value="auto" selected>Automatic</option>
       <option value="manual">Manual</option>
     </select>
-  </section>
 
-  <section id="step7" style="display:none;">
-    <h2>Step 7: Select Excipients (Manual Mode)</h2>
-    <div id="excipientCheckboxes"></div>
-  </section>
+    <div id="manualExcipientsContainer" style="display:none;">
+      <h3>Manual Excipients Input</h3>
+      <textarea id="manualExcipients" rows="5" placeholder="Enter excipients as name,role,costPerKg,minPercent,maxPercent separated by lines"></textarea>
+      <small>Example:<br>Microcrystalline Cellulose,Filler,5,2,10<br>Magnesium Stearate,Lubricant,8,0.5,2</small>
+    </div>
 
-  <section id="step8">
-    <h2>Step 8: Batch Size (Number of Units)</h2>
-    <input type="number" id="batchSize" placeholder="Batch Size" min="1" step="1" />
-  </section>
+    <h2>Step 7: Batch Size</h2>
+    <input type="number" id="batchSize" placeholder="Number of Units" min="1" />
 
-  <button id="generateBtn">Generate Formulation</button>
+    <button id="calculateBtn">Calculate Formulation</button>
+  </section>
 
   <section id="results" style="display:none;">
     <h2>Formulation Results</h2>
     <div id="batchInfo"></div>
-    <table id="resultTable">
+
+    <table id="resultTable" border="1">
       <thead>
-        <tr>
-          <th>Name</th><th>Role</th><th>Quantity (mg)</th><th>% of Total</th><th>Cost ($/kg)</th>
-        </tr>
+        <tr><th>Name</th><th>Function</th><th>Quantity (mg)</th><th>Percentage (%)</th><th>Cost per Kg ($)</th></tr>
       </thead>
       <tbody></tbody>
     </table>
 
-    <canvas id="pieChart" style="max-width: 600px; margin-top: 20px;"></canvas>
-
+    <canvas id="pieChart" style="max-width:400px; margin: 20px auto;"></canvas>
     <svg id="barcode"></svg>
 
     <div id="recommendations"></div>

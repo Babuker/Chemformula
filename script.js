@@ -1,256 +1,297 @@
-// Dummy database of excipients with roles, costs and typical ranges (as percentages)
-const excipientsDB = [
-  { name: "Binder", function: "Binder", cost: 15, min: 2, max: 6 },
-  { name: "Disintegrant", function: "Disintegrant", cost: 20, min: 1, max: 4 },
-  { name: "Lubricant", function: "Lubricant", cost: 10, min: 0.5, max: 2 },
-  { name: "Flavor", function: "Flavor", cost: 25, min: 0.2, max: 1 },
-  { name: "Preservative", function: "Preservative", cost: 18, min: 0.5, max: 1.5 },
-  { name: "Filler", function: "Filler", cost: 8, min: 10, max: 30 },
+// ======== Data for auto excipients (example) ========
+const excipientsList = [
+  {name: "Lactose", role: "Filler", cost: 0.5, minPercent: 10, maxPercent: 40},
+  {name: "Starch", role: "Binder", cost: 0.7, minPercent: 5, maxPercent: 20},
+  {name: "Magnesium Stearate", role: "Lubricant", cost: 1.2, minPercent: 0.5, maxPercent: 2},
+  {name: "Microcrystalline Cellulose", role: "Filler", cost: 0.6, minPercent: 10, maxPercent: 30},
+  {name: "Silicon Dioxide", role: "Glidant", cost: 1.0, minPercent: 0.5, maxPercent: 1.5},
 ];
 
-// Utility function to parse manual excipients input
-function parseManualExcipients(text) {
-  // Expect lines: Name, Role, Cost per Kg, Min %, Max %
-  const lines = text.trim().split('\n');
-  const result = [];
-  for (const line of lines) {
-    const parts = line.split(',').map(s => s.trim());
-    if (parts.length === 5) {
-      const [name, func, cost, minP, maxP] = parts;
-      result.push({
-        name,
-        function: func,
-        cost: parseFloat(cost),
-        min: parseFloat(minP),
-        max: parseFloat(maxP),
-      });
-    }
+// ======== Translations ========
+const translations = {
+  en: {
+    title: "ChemFormula® - Global Chemical Formulation Tool",
+    labelApiName: "Active Ingredient Name",
+    labelApiAmount: "Active Ingredient Amount (mg)",
+    labelReference: "Reference Standard",
+    labelDosageForm: "Dosage Form",
+    labelGoal: "Formulation Goal",
+    labelRelease: "Release Mechanism",
+    labelExcipientsMode: "Excipients Selection Mode",
+    labelManualExcipients: "Enter excipients manually (one per line):",
+    labelBatchSize: "Batch Size (units)",
+    calculateBtn: "Calculate Formulation",
+    resultsTitle: "Results",
+    thName: "Name",
+    thRole: "Role",
+    thQuantity: "Quantity (mg)",
+    thPercent: "Percentage (%)",
+    thCost: "Cost per Kg ($)",
+    recommendationsTitle: "Recommendations",
+    recStorage: "Optimal storage conditions: Store in a cool, dry place away from direct sunlight.",
+    recManufacture: "Recommended manufacturing method: Use direct compression for tablets; wet granulation for capsules.",
+    recPackaging: "Recommended packaging: Blister packs for tablets, bottles for liquids.",
+    recOther: "Ensure excipients compatibility with active ingredient chemically and physically.",
+    errorEqualExcipients: "Error: Excipients cannot have equal quantities.",
+    errorInput: "Please fill all required fields correctly.",
+    batchInfoText: (size, cost, storageM3, pallets) =>
+      `Batch Size: ${size} units | Estimated Cost: $${cost.toFixed(2)} | Storage Volume: ${storageM3.toFixed(2)} m³ | Pallets for shipping: ${pallets}`,
+  },
+  ar: {
+    title: "كيم فورمولا® - أداة تحسين التركيبة الكيميائية",
+    labelApiName: "اسم المادة الفعالة",
+    labelApiAmount: "كمية المادة الفعالة (ملج)",
+    labelReference: "المرجع",
+    labelDosageForm: "شكل الدواء",
+    labelGoal: "هدف التركيبة",
+    labelRelease: "طريقة تحرر المادة الفعالة",
+    labelExcipientsMode: "اختيار المواد المضافة",
+    labelManualExcipients: "إدخال المواد المضافة يدويًا (كل مادة في سطر منفصل):",
+    labelBatchSize: "حجم التشغيلة (وحدة)",
+    calculateBtn: "احسب التركيبة",
+    resultsTitle: "النتائج",
+    thName: "الاسم",
+    thRole: "الوظيفة",
+    thQuantity: "الكمية (ملج)",
+    thPercent: "النسبة المئوية (%)",
+    thCost: "التكلفة لكل كغ ($)",
+    recommendationsTitle: "التوصيات",
+    recStorage: "شروط التخزين المثلى: يحفظ في مكان بارد وجاف بعيد عن أشعة الشمس المباشرة.",
+    recManufacture: "طريقة التصنيع الموصى بها: استخدام الضغط المباشر للأقراص؛ الترطيب والتجفيف للكبسولات.",
+    recPackaging: "التعبئة الموصى بها: عبوات البليستر للأقراص، والعبوات الزجاجية أو البلاستيكية للسوائل.",
+    recOther: "تحقق من توافق المواد المضافة مع المادة الفعالة كيميائيًا وفيزيائيًا.",
+    errorEqualExcipients: "خطأ: لا يمكن أن تكون كميات المواد المضافة متساوية.",
+    errorInput: "يرجى ملء جميع الحقول المطلوبة بشكل صحيح.",
+    batchInfoText: (size, cost, storageM3, pallets) =>
+      `حجم التشغيلة: ${size} وحدة | التكلفة المقدرة: $${cost.toFixed(2)} | حجم التخزين: ${storageM3.toFixed(2)} م³ | عدد البليتات المناسبة للشحن: ${pallets}`,
   }
-  return result;
+};
+
+let currentLang = "en";
+
+// ========== Elements ==========
+const langSelect = document.getElementById("langSelect");
+const apiNameInput = document.getElementById("apiName");
+const apiAmountInput = document.getElementById("apiAmount");
+const referenceStandardSelect = document.getElementById("referenceStandard");
+const dosageFormSelect = document.getElementById("dosageForm");
+const formulationGoalSelect = document.getElementById("formulationGoal");
+const releaseMechanismSelect = document.getElementById("releaseMechanism");
+const excipientsModeSelect = document.getElementById("excipientsMode");
+const manualExcipientsContainer = document.getElementById("manualExcipientsContainer");
+const manualExcipientsTextarea = document.getElementById("manualExcipients");
+const batchSizeInput = document.getElementById("batchSize");
+const calculateBtn = document.getElementById("calculateBtn");
+const resultsSection = document.getElementById("results");
+const batchInfoDiv = document.getElementById("batchInfo");
+const resultTableBody = document.querySelector("#resultTable tbody");
+const recommendationsDiv = document.getElementById("recommendations");
+const pieChartCanvas = document.getElementById("pieChart");
+const barcodeSvg = document.getElementById("barcode");
+
+let pieChart = null;
+
+// ======= Update UI texts according to language =======
+function updateTexts() {
+  const t = translations[currentLang];
+  document.title = t.title;
+  document.getElementById("title").textContent = t.title;
+  document.getElementById("labelApiName").textContent = t.labelApiName;
+  document.getElementById("labelApiAmount").textContent = t.labelApiAmount;
+  document.getElementById("labelReference").textContent = t.labelReference;
+  document.getElementById("labelDosageForm").textContent = t.labelDosageForm;
+  document.getElementById("labelGoal").textContent = t.labelGoal;
+  document.getElementById("labelRelease").textContent = t.labelRelease;
+  document.getElementById("labelExcipientsMode").textContent = t.labelExcipientsMode;
+  document.getElementById("labelManualExcipients").textContent = t.labelManualExcipients;
+  document.getElementById("labelBatchSize").textContent = t.labelBatchSize;
+  calculateBtn.textContent = t.calculateBtn;
+  document.getElementById("resultsTitle").textContent = t.resultsTitle;
+  document.getElementById("thName").textContent = t.thName;
+  document.getElementById("thRole").textContent = t.thRole;
+  document.getElementById("thQuantity").textContent = t.thQuantity;
+  document.getElementById("thPercent").textContent = t.thPercent;
+  document.getElementById("thCost").textContent = t.thCost;
 }
 
-// Calculate total excipients percentage based on goal
-function calculateExcipientsTotalPercent(goal) {
-  if (goal === "Quality Only") return 10; // lower excipient content for quality focus
-  if (goal === "Cost Only") return 30;    // higher excipient content for cost focus (more fillers)
-  return 20;                             // balance
-}
+// ========== Show/hide manual excipients textarea ==========
+excipientsModeSelect.addEventListener("change", () => {
+  if (excipientsModeSelect.value === "manual") {
+    manualExcipientsContainer.style.display = "block";
+  } else {
+    manualExcipientsContainer.style.display = "none";
+  }
+});
 
-function calculateFormulation() {
-  // Clear previous results
-  const resultsDiv = document.getElementById('results');
-  const batchInfoDiv = document.getElementById('batchInfo');
-  const recommendationsDiv = document.getElementById('recommendations');
-  const tbody = document.querySelector('#resultTable tbody');
-  tbody.innerHTML = "";
-  recommendationsDiv.innerHTML = "";
-  batchInfoDiv.innerHTML = "";
+// ========== Language change ==========
+langSelect.addEventListener("change", () => {
+  currentLang = langSelect.value;
+  if (currentLang === "ar") {
+    document.body.setAttribute("dir", "rtl");
+  } else {
+    document.body.setAttribute("dir", "ltr");
+  }
+  updateTexts();
+});
 
-  // Inputs
-  const apiName = document.getElementById('apiName').value.trim();
-  const apiAmount = parseFloat(document.getElementById('apiAmount').value);
-  const referenceStandard = document.getElementById('referenceStandard').value;
-  const dosageForm = document.getElementById('dosageForm').value;
-  const formulationGoal = document.getElementById('formulationGoal').value;
-  const releaseMechanism = document.getElementById('releaseMechanism').value;
-  const excipientsMode = document.getElementById('excipientsMode').value;
-  const batchSize = parseInt(document.getElementById('batchSize').value);
+// ========== Initial setup ==========
+window.addEventListener("DOMContentLoaded", () => {
+  updateTexts();
+  if (currentLang === "ar") document.body.setAttribute("dir", "rtl");
+  else document.body.setAttribute("dir", "ltr");
+});
+
+// ========== Calculate formulation ==========
+document.getElementById("form").addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  // Validate inputs
+  const apiName = apiNameInput.value.trim();
+  const apiAmount = parseFloat(apiAmountInput.value);
+  const batchSize = parseInt(batchSizeInput.value);
+  const excipientsMode = excipientsModeSelect.value;
 
   if (!apiName || isNaN(apiAmount) || apiAmount <= 0 || isNaN(batchSize) || batchSize <= 0) {
-    alert("Please enter valid values for Active Ingredient, Amount, and Batch Size.");
+    alert(translations[currentLang].errorInput);
     return;
   }
 
-  // Select excipients list
-  let excipientsList = [];
+  let excipientsUsed = [];
+
   if (excipientsMode === "manual") {
-    const manualText = document.getElementById('manualExcipients').value;
-    excipientsList = parseManualExcipients(manualText);
-    if (excipientsList.length === 0) {
-      alert("Please enter valid manual excipients data.");
-      return;
+    const lines = manualExcipientsTextarea.value.trim().split("\n");
+    for (let line of lines) {
+      if (!line) continue;
+      const parts = line.split(",");
+      if (parts.length !== 5) {
+        alert(translations[currentLang].errorInput);
+        return;
+      }
+      const [name, role, costStr, minStr, maxStr] = parts.map(p => p.trim());
+      const cost = parseFloat(costStr);
+      const minPercent = parseFloat(minStr);
+      const maxPercent = parseFloat(maxStr);
+      if (!name || !role || isNaN(cost) || isNaN(minPercent) || isNaN(maxPercent)) {
+        alert(translations[currentLang].errorInput);
+        return;
+      }
+      excipientsUsed.push({name, role, cost, minPercent, maxPercent});
     }
   } else {
-    excipientsList = excipientsDB;
+    excipientsUsed = excipientsList;
   }
 
-  // Total excipients % based on formulation goal
-  const totalExcipientsPercent = calculateExcipientsTotalPercent(formulationGoal);
+  // Assign excipient percentages economically but respecting min/max
+  // Simple example: assign mid-value between min and max for each excipient
+  let totalPercentExcipients = 0;
+  let excipientPercents = [];
+  for (const exc of excipientsUsed) {
+    const perc = (exc.minPercent + exc.maxPercent) / 2;
+    excipientPercents.push(perc);
+    totalPercentExcipients += perc;
+  }
 
-  // Check if manual excipients quantities (min and max) are valid and not all equal
-  let equalMinMax = excipientsList.every(e => e.min === e.max);
-  if (equalMinMax) {
-    alert("Excipients min and max percentages cannot all be equal.");
+  // Normalize to 100% excluding API
+  const totalPercent = totalPercentExcipients + 100;
+  const scale = 100 / totalPercentExcipients;
+
+  // If any excipients have same percent, alert error
+  const percSet = new Set(excipientPercents);
+  if (percSet.size !== excipientPercents.length) {
+    alert(translations[currentLang].errorEqualExcipients);
     return;
   }
 
-  // Distribute excipients % proportionally between min and max (simple average)
-  const excipientsPercentages = excipientsList.map(e => (e.min + e.max) / 2);
-  const sumPercentages = excipientsPercentages.reduce((a,b) => a+b, 0);
-  // Normalize so sum equals totalExcipientsPercent
-  const normalizedPercentages = excipientsPercentages.map(p => p * totalExcipientsPercent / sumPercentages);
+  // Calculate weights and costs per batch
+  // API weight per unit is apiAmount (mg)
+  // Total unit weight: apiAmount + excipients weights scaled to 100% (mg)
+  // For batchSize, multiply by batchSize
 
-  // Calculate total unit weight = API + excipients
-  const totalUnitWeightMg = apiAmount / (1 - totalExcipientsPercent / 100);
+  // Calculate excipients weights per unit (mg)
+  let excipientsWeights = [];
+  for (let i = 0; i < excipientsUsed.length; i++) {
+    let w = (excipientPercents[i] * apiAmount) / 100;
+    excipientsWeights.push(w);
+  }
 
-  // Prepare results data rows
-  const rows = [];
+  // Total unit weight (API + excipients)
+  const unitWeightMg = apiAmount + excipientsWeights.reduce((a,b)=>a+b,0);
 
-  // Active Ingredient row
-  rows.push({
-    name: apiName,
-    function: "Active Ingredient",
-    quantity: apiAmount,
-    percentage: (apiAmount / totalUnitWeightMg) * 100,
-    cost: 0, // Assume API cost not included here
-  });
+  // Total batch weight in mg and convert to kg
+  const batchWeightKg = (unitWeightMg * batchSize) / 1e6;
 
-  // Excipients rows
-  excipientsList.forEach((ex, i) => {
-    const pct = normalizedPercentages[i];
-    const qtyMg = totalUnitWeightMg * (pct / 100);
-    rows.push({
-      name: ex.name,
-      function: ex.function,
-      quantity: qtyMg,
-      percentage: pct,
-      cost: ex.cost,
-    });
-  });
-
-  // Fill table rows
-  rows.forEach(row => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${row.name}</td>
-      <td>${row.function}</td>
-      <td>${row.quantity.toFixed(2)}</td>
-      <td>${row.percentage.toFixed(2)}</td>
-      <td>${row.cost.toFixed(2)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  // Batch info calculations
-  // Assume unit volume based on dosage form (rough estimations in cm3)
-  const volumePerUnitCm3 = {
-    "Tablet": 1,
-    "Coated Tablet": 1.1,
-    "Liquid Syrup": 5,
-    "Dry Syrup": 3,
-    "Capsule": 1.2,
-  };
-  const volumeUnit = volumePerUnitCm3[dosageForm] || 1;
-  const batchVolumeCm3 = volumeUnit * batchSize; // cm3
-  const batchVolumeM3 = batchVolumeCm3 / 1e6; // m3
-
-  // Assume pallet volume 1.2 m3 each
-  const pallets = Math.ceil(batchVolumeM3 / 1.2);
-
-  // Cost calculation: sum (qty in kg * cost per kg)
+  // Calculate costs
   let totalCost = 0;
-  rows.forEach(row => {
-    if (row.name !== apiName) {
-      totalCost += (row.quantity / 1e3) * row.cost;
-    }
-  });
+  // API cost assumed (example) 10$/kg
+  const apiCostPerKg = 10;
+  totalCost += (apiAmount/1e6) * batchSize * apiCostPerKg;
 
-  batchInfoDiv.innerHTML = `
-    <p><strong>Batch Size:</strong> ${batchSize} units</p>
-    <p><strong>Batch Volume:</strong> ${batchVolumeM3.toFixed(6)} m³</p>
-    <p><strong>Number of Pallets:</strong> ${pallets}</p>
-    <p><strong>Estimated Batch Cost:</strong> $${totalCost.toFixed(2)}</p>
+  let tableRows = "";
+  // API row
+  tableRows += `<tr><td>${apiName}</td><td>Active Ingredient</td><td>${apiAmount.toFixed(2)}</td><td>100%</td><td>$${apiCostPerKg.toFixed(2)}</td></tr>`;
+
+  for (let i = 0; i < excipientsUsed.length; i++) {
+    const exc = excipientsUsed[i];
+    const weight = excipientsWeights[i];
+    const cost = (weight / 1e6) * batchSize * exc.cost;
+    totalCost += cost;
+    const percent = excipientPercents[i].toFixed(2);
+    tableRows += `<tr><td>${exc.name}</td><td>${exc.role}</td><td>${weight.toFixed(2)}</td><td>${percent}</td><td>$${exc.cost.toFixed(2)}</td></tr>`;
+  }
+
+  // Calculate storage volume (example: unit volume 0.0001 m3)
+  const unitVolumeM3 = 0.0001;
+  const storageVolumeM3 = batchSize * unitVolumeM3;
+
+  // Pallets (example: each pallet holds 1000 units)
+  const unitsPerPallet = 1000;
+  const palletsNeeded = Math.ceil(batchSize / unitsPerPallet);
+
+  // Show results
+  batchInfoDiv.textContent = translations[currentLang].batchInfoText(batchSize, totalCost, storageVolumeM3, palletsNeeded);
+  resultTableBody.innerHTML = tableRows;
+  resultsSection.style.display = "block";
+
+  // Show recommendations
+  recommendationsDiv.innerHTML = `
+    <h3>${translations[currentLang].recommendationsTitle}</h3>
+    <ul>
+      <li>${translations[currentLang].recStorage}</li>
+      <li>${translations[currentLang].recManufacture}</li>
+      <li>${translations[currentLang].recPackaging}</li>
+      <li>${translations[currentLang].recOther}</li>
+    </ul>
   `;
 
-  // Generate pie chart
-  const ctx = document.getElementById('pieChart').getContext('2d');
-  if (window.pieChartInstance) {
-    window.pieChartInstance.destroy();
-  }
-  window.pieChartInstance = new Chart(ctx, {
+  // Draw pie chart
+  const pieData = {
+    labels: [apiName, ...excipientsUsed.map(e=>e.name)],
+    datasets: [{
+      data: [100, ...excipientPercents],
+      backgroundColor: ['#007bff','#6c757d','#28a745','#dc3545','#ffc107','#17a2b8','#6610f2','#e83e8c','#fd7e14']
+    }]
+  };
+
+  if (pieChart) pieChart.destroy();
+
+  pieChart = new Chart(pieChartCanvas, {
     type: 'pie',
-    data: {
-      labels: rows.map(r => r.name),
-      datasets: [{
-        data: rows.map(r => r.percentage),
-        backgroundColor: [
-          '#007bff', '#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6c757d', '#6610f2'
-        ],
-      }],
-    },
+    data: pieData,
     options: {
       responsive: true,
       plugins: {
-        legend: { position: 'bottom' },
-        title: { display: true, text: 'Formulation Composition (%)' },
+        legend: { position: 'bottom' }
       }
     }
   });
 
-  // Generate barcode for batch (using API name + batch size)
-  JsBarcode("#barcode", apiName + "-" + batchSize, {
+  // Generate barcode with batch info string
+  const barcodeText = `Batch:${batchSize}-API:${apiName}-Qty:${apiAmount}mg`;
+  JsBarcode(barcodeSvg, barcodeText, {
     format: "CODE128",
-    lineColor: "#000",
     width: 2,
-    height: 50,
+    height: 40,
     displayValue: true,
   });
 
-  // Recommendations
-  recommendationsDiv.innerHTML = `
-    <h3>Recommendations</h3>
-    <ul>
-      <li><strong>Storage Conditions:</strong> Store in a cool, dry place away from direct sunlight.</li>
-      <li><strong>Manufacturing Method:</strong> ${determineManufacturingMethod(dosageForm)}</li>
-      <li><strong>Optimal Packaging:</strong> ${determinePackagingType(dosageForm)}</li>
-      <li><strong>Other:</strong> Ensure excipients compatibility with API chemically and physically.</li>
-    </ul>
-  `;
-
-  resultsDiv.style.display = 'block';
-}
-
-function determineManufacturingMethod(dosageForm) {
-  switch (dosageForm) {
-    case "Tablet":
-    case "Coated Tablet":
-      return "Wet granulation or direct compression depending on excipients";
-    case "Capsule":
-      return "Fill capsules using powder blend";
-    case "Liquid Syrup":
-      return "Mixing and homogenization";
-    case "Dry Syrup":
-      return "Mixing dry powders with proper blending";
-    default:
-      return "Standard manufacturing process";
-  }
-}
-
-function determinePackagingType(dosageForm) {
-  switch (dosageForm) {
-    case "Tablet":
-      return "Blister packs or strips";
-    case "Coated Tablet":
-      return "Blister packs";
-    case "Capsule":
-      return "Bottles or blister packs";
-    case "Liquid Syrup":
-      return "Bottles with child-resistant caps";
-    case "Dry Syrup":
-      return "Powder sachets or bottles";
-    default:
-      return "Standard pharmaceutical packaging";
-  }
-}
-
-// Show/hide manual excipients input
-document.getElementById('excipientsMode').addEventListener('change', (e) => {
-  const manualContainer = document.getElementById('manualExcipientsContainer');
-  if (e.target.value === 'manual') {
-    manualContainer.style.display = 'block';
-  } else {
-    manualContainer.style.display = 'none';
-  }
 });
-
-document.getElementById('calculateBtn').addEventListener('click', calculateFormulation);

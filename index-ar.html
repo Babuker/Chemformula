@@ -1,98 +1,127 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ChemFormula® - أداة تحسين التركيبات الكيميائية</title>
-<meta name="description" content="أداة احترافية لتحسين التركيبات الكيميائية." />
-<link rel="stylesheet" href="style.css" />
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode/dist/JsBarcode.all.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChemFormula® | نظام عالمي لبناء التركيبات الدوائية</title>
+  <meta name="description" content="نظام احترافي لبناء التركيبات الدوائية مع اختيار ذكي للمواد المضافة وتحليل التكلفة والتوصيات."/>
+  <meta name="author" content="ChemFormula®"/>
+  <meta name="robots" content="index, follow"/>
+
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-<header>
-  <h1>ChemFormula® - أداة تحسين التركيبات الكيميائية</h1>
-  <div id="langSwitch">
-    <label for="langSelect">اللغة:</label>
-    <select id="langSelect">
+
+  <!-- Language Switch -->
+  <div class="lang-box">
+    <select id="langSelect" onchange="switchLang()">
       <option value="ar" selected>العربية</option>
       <option value="en">English</option>
     </select>
   </div>
-</header>
 
-<main>
-  <section id="inputs">
-    <h2>الخطوة 1: المادة الفعالة وكمية التركيز (ملجم)</h2>
-    <input type="text" id="apiName" placeholder="اسم المادة الفعالة" />
-    <input type="number" id="apiAmount" placeholder="الكمية (ملجم)" min="0" />
+  <header>
+    <h1>ChemFormula®</h1>
+    <p>نظام عالمي احترافي لبناء التركيبات الدوائية</p>
+  </header>
 
-    <h2>الخطوة 2: المرجع</h2>
-    <select id="referenceStandard">
-      <option value="USP">USP</option>
-      <option value="BP">BP</option>
-      <option value="EUP">EUP</option>
-    </select>
+  <main class="container">
 
-    <h2>الخطوة 3: شكل الدواء</h2>
-    <select id="dosageForm">
-      <option value="Tablet">قرص</option>
-      <option value="Coated Tablet">قرص مغلف</option>
-      <option value="Liquid Syrup">شراب سائل</option>
-      <option value="Dry Syrup">شراب جاف</option>
-      <option value="Capsule">كبسولة</option>
-    </select>
+    <!-- STEP 1 -->
+    <section class="card">
+      <h2>١. المادة الفعالة</h2>
+      <label for="apiName">اسم المادة الفعالة</label>
+      <input type="text" id="apiName" placeholder="مثال: باراسيتامول" />
+      <label for="apiMg">كمية المادة الفعالة (ملغم / وحدة)</label>
+      <input type="number" id="apiMg" min="0" step="0.01" />
+    </section>
 
-    <h2>الخطوة 4: هدف التركيبة</h2>
-    <select id="formulationGoal">
-      <option value="Quality & Cost">توازن الجودة والتكلفة</option>
-      <option value="Quality Only">الجودة فقط</option>
-      <option value="Cost Only">التكلفة فقط</option>
-    </select>
+    <!-- STEP 2 -->
+    <section class="card">
+      <h2>٢. المرجع الدستوري</h2>
+      <select id="reference">
+        <option value="USP">USP</option>
+        <option value="BP">BP</option>
+        <option value="EUP">Ph. Eur.</option>
+      </select>
+    </section>
 
-    <h2>الخطوة 5: طريقة تحرير المادة الفعالة</h2>
-    <select id="releaseMechanism">
-      <option value="Immediate">تحرير فوري</option>
-      <option value="Sustained">تحرير مستدام</option>
-      <option value="Delayed">تحرير مؤخر</option>
-    </select>
+    <!-- STEP 3 -->
+    <section class="card">
+      <h2>٣. الشكل الصيدلاني</h2>
+      <select id="dosageForm">
+        <option value="tablet">قرص</option>
+        <option value="coatedTablet">قرص مغلف</option>
+        <option value="capsule">كابسول</option>
+        <option value="liquid">شراب سائل</option>
+        <option value="drySyrup">شراب جاف</option>
+      </select>
+    </section>
 
-    <h2>الخطوة 6: اختيار المواد المضافة</h2>
-    <select id="excipientsMode">
-      <option value="auto" selected>تلقائي</option>
-      <option value="manual">يدوي</option>
-    </select>
+    <!-- STEP 4 -->
+    <section class="card">
+      <h2>٤. استراتيجية بناء التركيبة</h2>
+      <select id="strategy">
+        <option value="balanced">توازن الجودة والتكلفة</option>
+        <option value="quality">الجودة فقط</option>
+        <option value="cost">التكلفة فقط</option>
+      </select>
+    </section>
 
-    <div id="manualExcipientsContainer" style="display:none;">
-      <h3>إدخال المواد المضافة يدوياً</h3>
-      <textarea id="manualExcipients" rows="5" placeholder="ادخل المواد المضافة بالشكل: الاسم,الوظيفة,التكلفة للكيلو,النسبة الدنيا,النسبة العليا"></textarea>
-      <small>مثال:<br>ميكروكريستالين سيلولوز,حشو,5,2,10<br>ستيرات المغنسيوم,مزلق,8,0.5,2</small>
-    </div>
+    <!-- STEP 5 -->
+    <section class="card">
+      <h2>٥. معلومات التشغيلة</h2>
+      <label for="batchSize">حجم التشغيلة (عدد الوحدات)</label>
+      <input type="number" id="batchSize" min="1" step="1" />
+    </section>
 
-    <h2>الخطوة 7: حجم التشغيلة (عدد الوحدات)</h2>
-    <input type="number" id="batchSize" placeholder="عدد الوحدات" min="1" />
+    <!-- STEP 6 -->
+    <section class="card">
+      <h2>٦. اختيار المواد المضافة</h2>
+      <label for="additiveMode">طريقة تحديد كميات المواد المضافة</label>
+      <select id="additiveMode">
+        <option value="auto">آلي</option>
+        <option value="manual">يدوي</option>
+      </select>
+    </section>
 
-    <button id="calculateBtn">احسب التركيبة</button>
-  </section>
+    <!-- ACTION -->
+    <section class="card">
+      <button onclick="calculateFormula()">إنشاء التركيبة المثالية</button>
+    </section>
 
-  <section id="results" style="display:none;">
-    <h2>نتائج التركيبة</h2>
-    <div id="batchInfo"></div>
+    <!-- RESULTS -->
+    <section class="card" id="resultsSection" style="display:none;">
+      <h2>نتائج التركيبة</h2>
+      <div id="resultsTable"></div>
+    </section>
 
-    <table id="resultTable" border="1">
-      <thead>
-        <tr><th>الاسم</th><th>الوظيفة</th><th>الكمية (ملجم)</th><th>النسبة (%)</th><th>التكلفة لكل كيلو ($)</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <!-- BATCH SUMMARY -->
+    <section class="card" id="batchSummarySection" style="display:none;">
+      <h2>ملخص التشغيلة</h2>
+      <div id="batchSummary"></div>
+    </section>
 
-    <canvas id="pieChart" style="max-width:400px; margin: 20px auto;"></canvas>
-    <svg id="barcode"></svg>
+    <!-- RECOMMENDATIONS -->
+    <section class="card" id="recommendationsSection" style="display:none;">
+      <h2>التوصيات</h2>
+      <div id="recommendations"></div>
+    </section>
 
-    <div id="recommendations"></div>
-  </section>
-</main>
+    <!-- CHART -->
+    <section class="card" id="chartSection" style="display:none;">
+      <h2>مخطط التوزيع الدائري</h2>
+      <canvas id="compositionChart" height="120"></canvas>
+    </section>
 
-<script src="script.js"></script>
+    <!-- EXPORT -->
+    <section class="card" id="exportSection" style="display:none;">
+      <button onclick="window.print()">تصدير النتائج إلى PDF</button>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
 </body>
 </html>

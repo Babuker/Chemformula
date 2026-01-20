@@ -1,148 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ChemFormula® | Global Chemical Formulation Tool</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ChemFormula® | Global Chemical Formulation Tool</title>
 
-  <meta name="description" content="Professional chemical formulation tool with global standards support." />
-  <meta name="author" content="ChemFormula®" />
-  <meta name="robots" content="index, follow" />
+<meta name="description" content="Professional chemical formulation optimizer with batch info, multilingual support, and visual analytics." />
+<meta name="author" content="ChemFormula®" />
+<meta name="robots" content="index, follow" />
 
-  <link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="style.css" />
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- JsBarcode -->
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 </head>
 <body>
+<header>
+  <h1>ChemFormula®</h1>
+  <div class="lang-switcher">
+    <label for="langSelect">Language:</label>
+    <select id="langSelect">
+      <option value="en" selected>English</option>
+      <option value="ar">العربية</option>
+    </select>
+  </div>
+</header>
 
-  <header>
-    <h1>ChemFormula®</h1>
-    <p>Global Chemical Formulation Optimizer</p>
+<main>
+  <section id="step1">
+    <h2>Step 1: Active Ingredient Name and Amount (mg per unit)</h2>
+    <input type="text" id="apiName" placeholder="Active Ingredient Name" />
+    <input type="number" id="apiAmount" placeholder="Amount (mg)" min="0" step="0.01" />
+  </section>
 
-    <div id="languageSwitcher" class="lang-switcher">
-      <label for="langSelect">Language: </label>
-      <select id="langSelect">
-        <option value="en" selected>English</option>
-        <option value="ar">العربية</option>
-      </select>
-    </div>
-  </header>
+  <section id="step2">
+    <h2>Step 2: Reference Standard</h2>
+    <select id="reference">
+      <option value="" disabled selected>Select Reference</option>
+      <option value="USP">USP</option>
+      <option value="BP">BP</option>
+      <option value="EUP">EUP</option>
+    </select>
+  </section>
 
-  <main>
+  <section id="step3">
+    <h2>Step 3: Dosage Form</h2>
+    <select id="dosageForm">
+      <option value="" disabled selected>Select Dosage Form</option>
+      <option value="Tablet">Tablet</option>
+      <option value="Liquid">Liquid</option>
+      <option value="Powder">Powder</option>
+    </select>
+  </section>
 
-    <section id="step1" class="form-section">
-      <h2>Step 1: Active Ingredient & Dosage</h2>
-      <label for="apiName">Active Ingredient Name:</label>
-      <input type="text" id="apiName" placeholder="e.g., Paracetamol" required />
+  <section id="step4">
+    <h2>Step 4: Formulation Goal</h2>
+    <select id="formulationGoal">
+      <option value="" disabled selected>Select Formulation Goal</option>
+      <option value="Balanced">Balanced (Quality & Cost)</option>
+      <option value="Quality">Quality Only</option>
+      <option value="Cost">Cost Only</option>
+    </select>
+  </section>
 
-      <label for="apiAmount">Amount per unit (mg):</label>
-      <input type="number" id="apiAmount" min="1" step="any" placeholder="e.g., 500" required />
-    </section>
+  <section id="step5">
+    <h2>Step 5: Release Method</h2>
+    <select id="releaseMethod">
+      <option value="" disabled selected>Select Release Method</option>
+      <option value="Immediate">Immediate Release</option>
+      <option value="Sustained">Sustained Release</option>
+      <option value="Controlled">Controlled Release</option>
+    </select>
+  </section>
 
-    <section id="step2" class="form-section">
-      <h2>Step 2: Reference Standard</h2>
-      <select id="reference" required>
-        <option value="" disabled selected>Select Reference</option>
-        <option value="USP">USP</option>
-        <option value="BP">BP</option>
-        <option value="EUP">EUP</option>
-      </select>
-    </section>
+  <section id="step6">
+    <h2>Step 6: Excipient Input Mode</h2>
+    <select id="excipientMode">
+      <option value="auto" selected>Automatic</option>
+      <option value="manual">Manual</option>
+    </select>
+  </section>
 
-    <section id="step3" class="form-section">
-      <h2>Step 3: Dosage Form</h2>
-      <select id="dosageForm" required>
-        <option value="" disabled selected>Select Dosage Form</option>
-        <option value="Tablet">Tablet</option>
-        <option value="Liquid">Liquid</option>
-        <option value="Powder">Powder</option>
-      </select>
-    </section>
+  <section id="step7" style="display:none;">
+    <h2>Step 7: Select Excipients (Manual Mode)</h2>
+    <div id="excipientCheckboxes"></div>
+  </section>
 
-    <section id="step4" class="form-section">
-      <h2>Step 4: Formulation Goal</h2>
-      <select id="formulationGoal" required>
-        <option value="" disabled selected>Select Goal</option>
-        <option value="Quality">Quality</option>
-        <option value="Cost">Cost</option>
-        <option value="Balanced">Balanced Quality & Cost</option>
-      </select>
-    </section>
+  <section id="step8">
+    <h2>Step 8: Batch Size (Number of Units)</h2>
+    <input type="number" id="batchSize" placeholder="Batch Size" min="1" step="1" />
+  </section>
 
-    <section id="step5" class="form-section">
-      <h2>Step 5: Release Method</h2>
-      <select id="releaseMethod" required>
-        <option value="" disabled selected>Select Release Method</option>
-        <option value="Immediate">Immediate Release</option>
-        <option value="Sustained">Sustained Release</option>
-        <option value="Delayed">Delayed Release</option>
-      </select>
-    </section>
+  <button id="generateBtn">Generate Formulation</button>
 
-    <section id="step6" class="form-section">
-      <h2>Step 6: Excipient Selection Mode</h2>
-      <select id="excipientMode" required>
-        <option value="auto" selected>Automatic</option>
-        <option value="manual">Manual</option>
-      </select>
-    </section>
+  <section id="results" style="display:none;">
+    <h2>Formulation Results</h2>
+    <div id="batchInfo"></div>
+    <table id="resultTable">
+      <thead>
+        <tr>
+          <th>Name</th><th>Role</th><th>Quantity (mg)</th><th>% of Total</th><th>Cost ($/kg)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-    <section id="step7" class="form-section" style="display:none;">
-      <h2>Step 7: Select Excipients (Manual Mode)</h2>
-      <div id="excipientCheckboxes">
-        <!-- dynamically populated -->
-      </div>
-    </section>
+    <canvas id="pieChart" style="max-width: 600px; margin-top: 20px;"></canvas>
 
-    <section id="step8" class="form-section">
-      <h2>Step 8: Batch Size</h2>
-      <input type="number" id="batchSize" min="1" placeholder="e.g., 10000 units" required />
-    </section>
+    <svg id="barcode"></svg>
 
-    <button id="generateBtn">Generate Formula</button>
+    <div id="recommendations"></div>
+  </section>
+</main>
 
-    <section id="results" style="display:none;">
-      <h2>Formula Result</h2>
-
-      <div id="batchInfo"></div>
-
-      <table id="resultTable" border="1" cellspacing="0" cellpadding="5">
-        <thead>
-          <tr>
-            <th>Ingredient</th>
-            <th>Role</th>
-            <th>Quantity (mg)</th>
-            <th>Percentage (%)</th>
-            <th>Cost ($/kg)</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-
-      <canvas id="pieChart" width="400" height="400"></canvas>
-
-      <svg id="barcode"></svg>
-
-      <section id="recommendations"></section>
-    </section>
-
-  </main>
-
-  <script src="script.js"></script>
-
-  <script>
-    // Language switcher
-    document.getElementById("langSelect").addEventListener("change", (e) => {
-      if (e.target.value === "ar") {
-        window.location.href = "index-ar.html";
-      } else {
-        window.location.href = "index.html";
-      }
-    });
-  </script>
-
+<script src="script.js"></script>
 </body>
 </html>

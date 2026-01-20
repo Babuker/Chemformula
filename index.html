@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>ChemFormula® – Pre-Formulation Assistant</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Chart -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
 <body>
@@ -24,20 +29,16 @@
 <main>
 
 <section class="card">
-  <h2 data-i18n="api">Active Ingredient</h2>
-
+  <h2>Active Ingredient</h2>
   <label>Name</label>
-  <input id="apiName" type="text" placeholder="e.g. Paracetamol" />
+  <input id="apiName" type="text">
 
   <label>Dose per unit (mg)</label>
-  <input id="apiDose" type="number" />
-
-  <label>API cost ($ / unit)</label>
-  <input id="apiCost" type="number" />
+  <input id="apiDose" type="number">
 </section>
 
 <section class="card">
-  <h2 data-i18n="ref">Reference</h2>
+  <h2>Reference</h2>
   <select id="reference">
     <option>USP</option>
     <option>BP</option>
@@ -46,7 +47,7 @@
 </section>
 
 <section class="card">
-  <h2 data-i18n="form">Dosage Form</h2>
+  <h2>Dosage Form</h2>
   <select id="dosageForm">
     <option value="tablet">Tablet</option>
     <option value="capsule">Capsule</option>
@@ -56,23 +57,31 @@
 </section>
 
 <section class="card">
-  <h2 data-i18n="batch">Batch Size</h2>
-  <input id="batchSize" type="number" placeholder="Number of units" />
+  <h2>Formulation Strategy</h2>
+  <select id="strategy">
+    <option value="balanced">Balanced (Quality / Cost)</option>
+    <option value="quality">Quality Focused</option>
+    <option value="cost">Cost Optimized</option>
+  </select>
+</section>
+
+<section class="card">
+  <h2>Batch Size</h2>
+  <input id="batchSize" type="number">
 </section>
 
 <button onclick="runFormulation()">Generate Formulation</button>
 
 <section id="results" class="card hidden">
-  <h2 data-i18n="results">Results</h2>
+
+  <h2>Results</h2>
 
   <table id="resultTable">
     <thead>
       <tr>
         <th>Material</th>
         <th>Function</th>
-        <th>mg / unit</th>
-        <th>%</th>
-        <th>Cost ($)</th>
+        <th>% of unit</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -82,6 +91,9 @@
 
   <div id="batchInfo"></div>
   <div id="recommendations"></div>
+
+  <button onclick="exportPDF()">Export Full Report (PDF)</button>
+
 </section>
 
 </main>

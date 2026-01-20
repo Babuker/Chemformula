@@ -1,76 +1,76 @@
 let chart;
 
-const excipientLibrary = {
+const excipients = {
   tablet: [
-    { name: "MCC", function: "Diluent", min: 20, cost: 0.002 },
-    { name: "PVP", function: "Binder", min: 3, cost: 0.004 },
-    { name: "Croscarmellose", function: "Disintegrant", min: 2, cost: 0.005 },
-    { name: "Magnesium Stearate", function: "Lubricant", min: 0.5, cost: 0.006 }
+    { name: "MCC", function: "Diluent", min: 20 },
+    { name: "PVP", function: "Binder", min: 3 },
+    { name: "Croscarmellose", function: "Disintegrant", min: 2 },
+    { name: "Magnesium Stearate", function: "Lubricant", min: 0.5 }
   ],
   capsule: [
-    { name: "Lactose", function: "Filler", min: 30, cost: 0.002 },
-    { name: "Talc", function: "Glidant", min: 1, cost: 0.003 }
+    { name: "Lactose", function: "Filler", min: 30 },
+    { name: "Talc", function: "Glidant", min: 1 }
   ],
   liquid: [
-    { name: "Purified Water", function: "Solvent", min: 70, cost: 0.0005 },
-    { name: "Sodium Benzoate", function: "Preservative", min: 0.1, cost: 0.01 }
+    { name: "Purified Water", function: "Solvent", min: 70 },
+    { name: "Sodium Benzoate", function: "Preservative", min: 0.1 }
   ],
   dry_syrup: [
-    { name: "Sucrose", function: "Diluent", min: 60, cost: 0.001 },
-    { name: "Flavor", function: "Flavoring", min: 0.2, cost: 0.02 }
+    { name: "Sucrose", function: "Diluent", min: 60 },
+    { name: "Flavor", function: "Flavoring", min: 0.2 }
   ]
 };
 
 function runFormulation() {
 
   const apiDose = Number(apiDoseInput().value);
-  const apiCost = Number(apiCostInput().value);
-  const batchSize = Number(batchSizeInput().value);
   const form = dosageFormInput().value;
+  const batchSize = Number(batchSizeInput().value);
 
-  const excipients = excipientLibrary[form];
-  let totalExcipientMg = 100 - apiDose;
+  if (apiDose <= 0 || apiDose >= 100) {
+    alert("API dose must be between 0 and 100%");
+    return;
+  }
+
+  const excList = excipients[form];
+  let remaining = 100 - apiDose;
 
   let tbody = document.querySelector("#resultTable tbody");
   tbody.innerHTML = "";
 
-  let labels = [];
-  let data = [];
-  let totalCost = apiCost;
+  let labels = ["API"];
+  let data = [apiDose];
 
-  let usedMg = 0;
+  excList.forEach((e, i) => {
 
-  excipients.forEach((e, i) => {
-    let mg = (i === excipients.length - 1)
-      ? totalExcipientMg - usedMg
-      : e.min;
+    let percent;
 
-    usedMg += mg;
+    if (i === excList.length - 1) {
+      percent = remaining;
+    } else {
+      percent = e.min;
+      remaining -= percent;
+    }
 
-    let cost = mg * e.cost;
-    totalCost += cost;
+    if (percent < 0) percent = 0;
 
     tbody.innerHTML += `
       <tr>
         <td>${e.name}</td>
         <td>${e.function}</td>
-        <td>${mg.toFixed(2)}</td>
-        <td>${(mg).toFixed(2)}%</td>
-        <td>${cost.toFixed(4)}</td>
+        <td>${percent.toFixed(2)}%</td>
       </tr>
     `;
 
     labels.push(e.name);
-    data.push(mg);
+    data.push(percent);
   });
 
   tbody.innerHTML += `
     <tr>
       <td><b>API</b></td>
       <td>Active</td>
-      <td>${apiDose}</td>
-      <td>${apiDose}%</td>
-      <td>${apiCost.toFixed(4)}</td>
+      <td>${apiDose.toFixed(2)}%</td>
     </tr>
   `;
 
@@ -86,7 +86,6 @@ function runFormulation() {
   document.getElementById("batchInfo").innerHTML = `
     <h3>Batch Information</h3>
     <p>Batch size: ${batchSize} units</p>
-    <p>Batch cost: ${(totalCost * batchSize).toFixed(2)} $</p>
     <p>Estimated storage volume: ${(batchSize * 0.000001).toFixed(3)} m³</p>
     <p>Pallets required: ${Math.ceil(batchSize / 50000)}</p>
   `;
@@ -94,14 +93,24 @@ function runFormulation() {
   document.getElementById("recommendations").innerHTML = `
     <h3>Recommendations</h3>
     <ul>
-      <li>Manufacturing: ${form === "tablet" ? "Direct compression" : "Standard mixing"}</li>
-      <li>Packaging: ${form === "liquid" ? "HDPE bottle" : "Blister"}</li>
-      <li>Storage: Store below 25°C, protect from moisture</li>
+      <li>Storage temperature: below 25°C</li>
+      <li>Relative humidity: below 60%</li>
+      <li>Manufacturing method: ${form === "tablet" ? "Direct Compression" : "Standard Mixing"}</li>
+      <li>Packaging: ${form === "liquid" ? "HDPE Bottle" : "Blister"}</li>
     </ul>
   `;
 }
 
+function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.text("ChemFormula® – Formulation Report", 10, 10);
+  doc.text(document.getElementById("results").innerText, 10, 20);
+
+  doc.save("ChemFormula_Report.pdf");
+}
+
 function apiDoseInput(){ return document.getElementById("apiDose"); }
-function apiCostInput(){ return document.getElementById("apiCost"); }
-function batchSizeInput(){ return document.getElementById("batchSize"); }
 function dosageFormInput(){ return document.getElementById("dosageForm"); }
+function batchSizeInput(){ return document.getElementById("batchSize"); }

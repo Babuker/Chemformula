@@ -3,21 +3,16 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>كيم فورمولا® | أداة تحسين التركيب الكيميائي</title>
-
-<meta name="description" content="أداة تحسين التركيب الكيميائي المهنية مع معلومات التشغيلة، دعم متعدد اللغات، وتحليل بصري." />
-<meta name="author" content="كيم فورمولا®" />
-<meta name="robots" content="index, follow" />
-
+<title>ChemFormula® - أداة تحسين التركيبات الكيميائية</title>
+<meta name="description" content="أداة احترافية لتحسين التركيبات الكيميائية." />
 <link rel="stylesheet" href="style.css" />
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode/dist/JsBarcode.all.min.js"></script>
 </head>
 <body>
 <header>
-  <h1>كيم فورمولا®</h1>
-  <div class="lang-switcher">
+  <h1>ChemFormula® - أداة تحسين التركيبات الكيميائية</h1>
+  <div id="langSwitch">
     <label for="langSelect">اللغة:</label>
     <select id="langSelect">
       <option value="ar" selected>العربية</option>
@@ -27,86 +22,71 @@
 </header>
 
 <main>
-  <section id="step1">
-    <h2>الخطوة 1: اسم المادة الفعالة وكمية التركيز (ملجم لكل وحدة)</h2>
+  <section id="inputs">
+    <h2>الخطوة 1: المادة الفعالة وكمية التركيز (ملجم)</h2>
     <input type="text" id="apiName" placeholder="اسم المادة الفعالة" />
-    <input type="number" id="apiAmount" placeholder="الكمية (ملجم)" min="0" step="0.01" />
-  </section>
+    <input type="number" id="apiAmount" placeholder="الكمية (ملجم)" min="0" />
 
-  <section id="step2">
-    <h2>الخطوة 2: المرجع القياسي</h2>
-    <select id="reference">
-      <option value="" disabled selected>اختر المرجع</option>
+    <h2>الخطوة 2: المرجع</h2>
+    <select id="referenceStandard">
       <option value="USP">USP</option>
       <option value="BP">BP</option>
       <option value="EUP">EUP</option>
     </select>
-  </section>
 
-  <section id="step3">
     <h2>الخطوة 3: شكل الدواء</h2>
     <select id="dosageForm">
-      <option value="" disabled selected>اختر شكل الدواء</option>
       <option value="Tablet">قرص</option>
-      <option value="Liquid">شراب سائل</option>
-      <option value="Powder">بودرة جافة</option>
+      <option value="Coated Tablet">قرص مغلف</option>
+      <option value="Liquid Syrup">شراب سائل</option>
+      <option value="Dry Syrup">شراب جاف</option>
+      <option value="Capsule">كبسولة</option>
     </select>
-  </section>
 
-  <section id="step4">
     <h2>الخطوة 4: هدف التركيبة</h2>
     <select id="formulationGoal">
-      <option value="" disabled selected>اختر هدف التركيبة</option>
-      <option value="Balanced">توازن الجودة والتكلفة</option>
-      <option value="Quality">الجودة فقط</option>
-      <option value="Cost">التكلفة فقط</option>
+      <option value="Quality & Cost">توازن الجودة والتكلفة</option>
+      <option value="Quality Only">الجودة فقط</option>
+      <option value="Cost Only">التكلفة فقط</option>
     </select>
-  </section>
 
-  <section id="step5">
-    <h2>الخطوة 5: طريقة تحرر المادة الفعالة</h2>
-    <select id="releaseMethod">
-      <option value="" disabled selected>اختر طريقة التحرر</option>
-      <option value="Immediate">تحرر فوري</option>
-      <option value="Sustained">تحرر مستمر</option>
-      <option value="Controlled">تحرر محكم</option>
+    <h2>الخطوة 5: طريقة تحرير المادة الفعالة</h2>
+    <select id="releaseMechanism">
+      <option value="Immediate">تحرير فوري</option>
+      <option value="Sustained">تحرير مستدام</option>
+      <option value="Delayed">تحرير مؤخر</option>
     </select>
-  </section>
 
-  <section id="step6">
-    <h2>الخطوة 6: وضع إدخال المواد المضافة</h2>
-    <select id="excipientMode">
-      <option value="auto" selected>آلي</option>
+    <h2>الخطوة 6: اختيار المواد المضافة</h2>
+    <select id="excipientsMode">
+      <option value="auto" selected>تلقائي</option>
       <option value="manual">يدوي</option>
     </select>
-  </section>
 
-  <section id="step7" style="display:none;">
-    <h2>الخطوة 7: اختر المواد المضافة (الوضع اليدوي)</h2>
-    <div id="excipientCheckboxes"></div>
-  </section>
+    <div id="manualExcipientsContainer" style="display:none;">
+      <h3>إدخال المواد المضافة يدوياً</h3>
+      <textarea id="manualExcipients" rows="5" placeholder="ادخل المواد المضافة بالشكل: الاسم,الوظيفة,التكلفة للكيلو,النسبة الدنيا,النسبة العليا"></textarea>
+      <small>مثال:<br>ميكروكريستالين سيلولوز,حشو,5,2,10<br>ستيرات المغنسيوم,مزلق,8,0.5,2</small>
+    </div>
 
-  <section id="step8">
-    <h2>الخطوة 8: حجم التشغيلة (عدد الوحدات)</h2>
-    <input type="number" id="batchSize" placeholder="حجم التشغيلة" min="1" step="1" />
-  </section>
+    <h2>الخطوة 7: حجم التشغيلة (عدد الوحدات)</h2>
+    <input type="number" id="batchSize" placeholder="عدد الوحدات" min="1" />
 
-  <button id="generateBtn">توليد التركيبة</button>
+    <button id="calculateBtn">احسب التركيبة</button>
+  </section>
 
   <section id="results" style="display:none;">
     <h2>نتائج التركيبة</h2>
     <div id="batchInfo"></div>
-    <table id="resultTable">
+
+    <table id="resultTable" border="1">
       <thead>
-        <tr>
-          <th>الاسم</th><th>الدور</th><th>الكمية (ملجم)</th><th>% من الإجمالي</th><th>التكلفة ($/كجم)</th>
-        </tr>
+        <tr><th>الاسم</th><th>الوظيفة</th><th>الكمية (ملجم)</th><th>النسبة (%)</th><th>التكلفة لكل كيلو ($)</th></tr>
       </thead>
       <tbody></tbody>
     </table>
 
-    <canvas id="pieChart" style="max-width: 600px; margin-top: 20px;"></canvas>
-
+    <canvas id="pieChart" style="max-width:400px; margin: 20px auto;"></canvas>
     <svg id="barcode"></svg>
 
     <div id="recommendations"></div>

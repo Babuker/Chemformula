@@ -1,238 +1,366 @@
-// Data for excipients
-const excipientsData = [
-  { name: "Microcrystalline Cellulose", role: "Filler", cost: 5 },
-  { name: "Magnesium Stearate", role: "Lubricant", cost: 10 },
-  { name: "Povidone", role: "Binder", cost: 7 },
-  { name: "Sodium Starch Glycolate", role: "Disintegrant", cost: 8 },
-  { name: "Colloidal Silicon Dioxide", role: "Glidant", cost: 6 },
-  { name: "Flavor", role: "Flavoring Agent", cost: 12 },
-  { name: "Sweetener", role: "Sweetener", cost: 9 },
-];
+// ترجمة نصوص بسيطة بين اللغتين
+const translations = {
+  en: {
+    activeIngredient: "Active Ingredient Name",
+    amountMg: "Amount (mg)",
+    referenceStandard: "Reference Standard",
+    dosageForm: "Dosage Form",
+    formulationGoal: "Formulation Goal",
+    releaseMechanism: "Release Mechanism",
+    excipientsMode: "Excipients Selection Mode",
+    manualExcipientsInput: "Manual Excipients Input",
+    batchSize: "Batch Size (units)",
+    calculateBtn: "Calculate Formulation",
+    step1: "Step 1: Active Ingredient & Amount",
+    step2: "Step 2: Reference Standard",
+    step3: "Step 3: Dosage Form",
+    step4: "Step 4: Formulation Goal",
+    step5: "Step 5: Release Mechanism",
+    step6: "Step 6: Excipients Selection Mode",
+    step7: "Step 7: Batch Size",
+    langLabel: "Language:",
+    recommendationsTitle: "Recommendations",
+    storage: "Optimal Storage Conditions",
+    manufacturing: "Optimal Manufacturing Method",
+    packaging: "Optimal Packaging Form",
+    other: "Other Recommendations",
+    batchInfo: "Batch Information",
+  },
+  ar: {
+    activeIngredient: "اسم المادة الفعالة",
+    amountMg: "الكمية (ملجم)",
+    referenceStandard: "المرجع",
+    dosageForm: "شكل الدواء",
+    formulationGoal: "هدف التركيبة",
+    releaseMechanism: "طريقة تحرير المادة الفعالة",
+    excipientsMode: "اختيار المواد المضافة",
+    manualExcipientsInput: "إدخال المواد المضافة يدوياً",
+    batchSize: "حجم التشغيلة (عدد الوحدات)",
+    calculateBtn: "احسب التركيبة",
+    step1: "الخطوة 1: المادة الفعالة وكمية التركيز",
+    step2: "الخطوة 2: المرجع",
+    step3: "الخطوة 3: شكل الدواء",
+    step4: "الخطوة 4: هدف التركيبة",
+    step5: "الخطوة 5: طريقة تحرير المادة الفعالة",
+    step6: "الخطوة 6: اختيار المواد المضافة",
+    step7: "الخطوة 7: حجم التشغيلة",
+    langLabel: "اللغة:",
+    recommendationsTitle: "التوصيات",
+    storage: "شروط التخزين المثلى",
+    manufacturing: "طريقة التصنيع المثلى",
+    packaging: "شكل التغليف المثالي",
+    other: "توصيات أخرى",
+    batchInfo: "معلومات التشغيلة",
+  }
+};
 
-// Format numbers nicely
-function formatNumber(num, decimals = 2) {
-  return parseFloat(num).toFixed(decimals);
+let currentLang = 'en';
+
+// عناصر الواجهة
+const langSelect = document.getElementById('langSelect');
+const apiNameInput = document.getElementById('apiName');
+const apiAmountInput = document.getElementById('apiAmount');
+const referenceSelect = document.getElementById('referenceStandard');
+const dosageFormSelect = document.getElementById('dosageForm');
+const formulationGoalSelect = document.getElementById('formulationGoal');
+const releaseMechanismSelect = document.getElementById('releaseMechanism');
+const excipientsModeSelect = document.getElementById('excipientsMode');
+const manualExcipientsContainer = document.getElementById('manualExcipientsContainer');
+const manualExcipientsInput = document.getElementById('manualExcipients');
+const batchSizeInput = document.getElementById('batchSize');
+const calculateBtn = document.getElementById('calculateBtn');
+
+const resultsSection = document.getElementById('results');
+const batchInfoDiv = document.getElementById('batchInfo');
+const resultTableBody = document.querySelector('#resultTable tbody');
+const recommendationsDiv = document.getElementById('recommendations');
+const pieChartCanvas = document.getElementById('pieChart');
+const barcodeSvg = document.getElementById('barcode');
+
+let pieChart;
+
+// تغيير اللغة وتحديث النصوص
+function updateLanguage(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.body.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+
+  document.querySelector('header h1').textContent = (lang === 'ar') ? "ChemFormula® - أداة تحسين التركيبات الكيميائية" : "ChemFormula® - Chemical Formulation Optimizer";
+
+  // تحديث نصوص الفقرات والحقول
+  document.querySelector('#inputs h2:nth-of-type(1)').textContent = translations[lang].step1;
+  apiNameInput.placeholder = translations[lang].activeIngredient;
+  apiAmountInput.placeholder = translations[lang].amountMg;
+
+  document.querySelector('#inputs h2:nth-of-type(2)').textContent = translations[lang].step2;
+  document.querySelector('#inputs h2:nth-of-type(3)').textContent = translations[lang].step3;
+  document.querySelector('#inputs h2:nth-of-type(4)').textContent = translations[lang].step4;
+  document.querySelector('#inputs h2:nth-of-type(5)').textContent = translations[lang].step5;
+  document.querySelector('#inputs h2:nth-of-type(6)').textContent = translations[lang].step6;
+  document.querySelector('#inputs h2:nth-of-type(7)').textContent = translations[lang].step7;
+
+  document.querySelector('#manualExcipientsContainer h3').textContent = translations[lang].manualExcipientsInput;
+  calculateBtn.textContent = translations[lang].calculateBtn;
+  document.querySelector('#langSwitch label').textContent = translations[lang].langLabel;
+
+  // تحديث الجدول
+  document.querySelector('#resultTable thead tr').innerHTML =
+    `<th>${(lang==='ar') ? 'الاسم' : 'Name'}</th>
+     <th>${(lang==='ar') ? 'الوظيفة' : 'Function'}</th>
+     <th>${(lang==='ar') ? 'الكمية (ملجم)' : 'Quantity (mg)'}</th>
+     <th>${(lang==='ar') ? 'النسبة (%)' : 'Percentage (%)'}</th>
+     <th>${(lang==='ar') ? 'التكلفة لكل كيلو ($)' : 'Cost per Kg ($)'}</th>`;
+  
+  // تحديث نتائج اذا موجودة
+  if(resultsSection.style.display !== 'none') {
+    calculateFormulation();
+  }
 }
 
-// Language switcher functionality
-const langSelect = document.getElementById("langSelect");
-langSelect.addEventListener("change", (e) => {
-  const lang = e.target.value;
-  localStorage.setItem("lang", lang);
-  if (lang === "ar") window.location.href = "index-ar.html";
-  else window.location.href = "index.html";
+// اظهار او اخفاء ادخال المواد المضافة يدوياً
+excipientsModeSelect.addEventListener('change', () => {
+  manualExcipientsContainer.style.display = excipientsModeSelect.value === 'manual' ? 'block' : 'none';
 });
-window.addEventListener("load", () => {
-  const savedLang = localStorage.getItem("lang");
-  if (savedLang && savedLang === "ar" && !window.location.href.includes("index-ar.html")) {
-    window.location.href = "index-ar.html";
-  } else if (savedLang === "en" && window.location.href.includes("index-ar.html")) {
-    window.location.href = "index.html";
+
+// زر الحساب
+calculateBtn.addEventListener('click', calculateFormulation);
+
+// دالة التحقق من توافق المدخلات
+function validateInputs(){
+  if(!apiNameInput.value.trim()) {
+    alert(currentLang === 'ar' ? "يرجى إدخال اسم المادة الفعالة" : "Please enter active ingredient name");
+    return false;
   }
-});
-
-// Excipient manual selection show/hide
-const excipientModeSelect = document.getElementById("excipientMode");
-const excipientCheckboxesDiv = document.getElementById("excipientCheckboxes");
-const step7Section = document.getElementById("step7");
-
-function populateExcipientCheckboxes() {
-  excipientCheckboxesDiv.innerHTML = "";
-  excipientsData.forEach((ex, idx) => {
-    const div = document.createElement("div");
-    div.style.marginBottom = "8px";
-    div.innerHTML = `
-      <input type="checkbox" id="excipient_${idx}" name="excipients" value="${ex.name}" />
-      <label for="excipient_${idx}">${ex.name} (${ex.role})</label>
-    `;
-    excipientCheckboxesDiv.appendChild(div);
-  });
+  if(apiAmountInput.value <= 0) {
+    alert(currentLang === 'ar' ? "يرجى إدخال كمية صحيحة للمادة الفعالة" : "Please enter valid amount");
+    return false;
+  }
+  if(batchSizeInput.value <= 0) {
+    alert(currentLang === 'ar' ? "يرجى إدخال حجم التشغيلة الصحيح" : "Please enter valid batch size");
+    return false;
+  }
+  if(excipientsModeSelect.value === 'manual') {
+    if(!manualExcipientsInput.value.trim()) {
+      alert(currentLang === 'ar' ? "يرجى إدخال المواد المضافة يدوياً" : "Please enter manual excipients");
+      return false;
+    }
+  }
+  return true;
 }
 
-excipientModeSelect.addEventListener("change", () => {
-  if (excipientModeSelect.value === "manual") {
-    step7Section.style.display = "block";
-    populateExcipientCheckboxes();
-  } else {
-    step7Section.style.display = "none";
-    excipientCheckboxesDiv.innerHTML = "";
-  }
-});
+// توليد صيغة المواد المضافة تلقائياً حسب شكل الدواء والهدف
+function generateAutoExcipients(dosageForm, formulationGoal) {
+  // عين المواد الافتراضية مع النسب (مثال مبسط)
+  // المواد: الاسم, الوظيفة, التكلفة لكل كيلو, النسبة الدنيا %, النسبة العليا %
+  const excipientsDB = {
+    "Tablet": [
+      {name:"Microcrystalline Cellulose", role:"Filler", cost:5, min:10, max:20},
+      {name:"Lactose", role:"Filler", cost:4, min:5, max:15},
+      {name:"Magnesium Stearate", role:"Lubricant", cost:8, min:0.5, max:2},
+      {name:"Povidone", role:"Binder", cost:7, min:2, max:6},
+      {name:"Croscarmellose Sodium", role:"Disintegrant", cost:6, min:2, max:5},
+    ],
+    "Coated Tablet": [
+      {name:"Microcrystalline Cellulose", role:"Filler", cost:5, min:10, max:18},
+      {name:"Lactose", role:"Filler", cost:4, min:5, max:12},
+      {name:"Magnesium Stearate", role:"Lubricant", cost:8, min:0.5, max:2},
+      {name:"Povidone", role:"Binder", cost:7, min:2, max:5},
+      {name:"Croscarmellose Sodium", role:"Disintegrant", cost:6, min:2, max:5},
+      {name:"Film Coating", role:"Coating", cost:12, min:2, max:4}
+    ],
+    "Liquid Syrup": [
+      {name:"Sucrose", role:"Sweetener", cost:3, min:50, max:70},
+      {name:"Citric Acid", role:"Buffer", cost:4, min:0.1, max:0.5},
+      {name:"Preservative", role:"Preservative", cost:10, min:0.2, max:0.5}
+    ],
+    "Dry Syrup": [
+      {name:"Mannitol", role:"Sweetener", cost:4, min:30, max:50},
+      {name:"Citric Acid", role:"Buffer", cost:4, min:0.1, max:0.5},
+      {name:"Preservative", role:"Preservative", cost:10, min:0.2, max:0.5}
+    ],
+    "Capsule": [
+      {name:"Microcrystalline Cellulose", role:"Filler", cost:5, min:15, max:25},
+      {name:"Magnesium Stearate", role:"Lubricant", cost:8, min:0.5, max:2},
+      {name:"Gelatin", role:"Capsule Shell", cost:15, min:30, max:40}
+    ],
+  };
 
-// Main generate button
-document.getElementById("generateBtn").addEventListener("click", () => {
-  const apiName = document.getElementById("apiName").value.trim();
-  const apiAmount = parseFloat(document.getElementById("apiAmount").value);
-  const reference = document.getElementById("reference").value;
-  const dosageForm = document.getElementById("dosageForm").value;
-  const formulationGoal = document.getElementById("formulationGoal").value;
-  const releaseMethod = document.getElementById("releaseMethod").value;
-  const excipientMode = excipientModeSelect.value;
-  const batchSize = parseInt(document.getElementById("batchSize").value);
-
-  if (
-    !apiName ||
-    isNaN(apiAmount) || apiAmount <= 0 ||
-    !reference ||
-    !dosageForm ||
-    !formulationGoal ||
-    !releaseMethod ||
-    isNaN(batchSize) || batchSize <= 0
-  ) {
-    alert("Please fill all fields with valid values.");
-    return;
-  }
-
-  // Selected excipients
-  let selectedExcipients = [];
-
-  if (excipientMode === "manual") {
-    const checkedBoxes = document.querySelectorAll('input[name="excipients"]:checked');
-    if (checkedBoxes.length === 0) {
-      alert("Please select at least one excipient in manual mode.");
-      return;
-    }
-    selectedExcipients = Array.from(checkedBoxes).map(cb => excipientsData.find(ex => ex.name === cb.value));
-  } else {
-    if (formulationGoal === "Quality") {
-      selectedExcipients = excipientsData.filter(ex => ex.role !== "Flavor" && ex.role !== "Sweetener");
-    } else if (formulationGoal === "Cost") {
-      selectedExcipients = excipientsData.filter(ex => ex.role === "Filler" || ex.role === "Binder");
-    } else {
-      selectedExcipients = excipientsData.filter(ex => ex.role !== "Flavor");
-    }
-  }
-
-  // Total unit weight calculation
-  const weightMultipliers = { USP: 1.15, BP: 1.12, EUP: 1.10 };
-  let totalUnitWeight = apiAmount * (weightMultipliers[reference] || 1.15);
-
-  if (dosageForm === "Tablet") totalUnitWeight *= 1.0;
-  else if (dosageForm === "Liquid") totalUnitWeight *= 3.0;
-  else if (dosageForm === "Powder") totalUnitWeight *= 1.3;
-
-  let excipientsTotalWeight = totalUnitWeight - apiAmount;
-  if (excipientsTotalWeight < 0) excipientsTotalWeight = apiAmount * 0.1;
-
-  // Ensure excipient quantities are not equal - distribute percentages differently
-  let percentages = [];
-  const n = selectedExcipients.length;
-  let totalPercentage = 0;
-  for (let i = 0; i < n; i++) {
-    let pct = 5 + (i * (95 / (n - 1))); // linear increasing percentage
-    percentages.push(pct);
-    totalPercentage += pct;
-  }
-  percentages = percentages.map(p => p * (100 / totalPercentage)); // normalize to 100%
-
-  let excipientQuantities = percentages.map(pct => (pct * excipientsTotalWeight) / 100);
-
-  // Compose full formulation list including API
-  const formulation = [{
-    name: apiName,
-    role: "Active Ingredient",
-    quantity: apiAmount,
-    percentage: (apiAmount / totalUnitWeight) * 100,
-    cost: 0 // Assume cost included in excipients or ignored here
-  }];
-
-  for (let i = 0; i < n; i++) {
-    formulation.push({
-      name: selectedExcipients[i].name,
-      role: selectedExcipients[i].role,
-      quantity: excipientQuantities[i],
-      percentage: percentages[i],
-      cost: selectedExcipients[i].cost
+  let excips = excipientsDB[dosageForm] || [];
+  // تعديل حسب هدف التركيبة (مثال: لو فقط جودة، نزيد النسب العليا)
+  if(formulationGoal === "Quality Only") {
+    excips = excips.map(e => {
+      return {...e, max: e.max + 5};
+    });
+  } else if(formulationGoal === "Cost Only") {
+    excips = excips.map(e => {
+      return {...e, max: Math.min(e.max - 2, e.max)};
     });
   }
 
-  // Calculate costs
-  let totalCost = 0;
-  for (const item of formulation) {
-    totalCost += (item.quantity / 1000) * item.cost * batchSize; // quantity in grams * cost per kg * batch size
+  return excips;
+}
+
+// حساب التركيبة المثالية
+function calculateFormulation() {
+  if(!validateInputs()) return;
+
+  // اجمع بيانات المستخدم
+  const apiName = apiNameInput.value.trim();
+  const apiAmount = parseFloat(apiAmountInput.value);
+  const referenceStandard = referenceSelect.value;
+  const dosageForm = dosageFormSelect.value;
+  const formulationGoal = formulationGoalSelect.value;
+  const releaseMechanism = releaseMechanismSelect.value;
+  const excipientsMode = excipientsModeSelect.value;
+  const batchSize = parseInt(batchSizeInput.value);
+
+  // اجلب المواد المضافة يدويا أو تلقائيا
+  let excipients = [];
+  if(excipientsMode === 'manual') {
+    // تحليل المدخلات يدوياً
+    const lines = manualExcipientsInput.value.trim().split('\n');
+    for(const line of lines) {
+      const parts = line.split(',');
+      if(parts.length !== 5) {
+        alert(currentLang==='ar' ? "تنسيق المواد المضافة غير صحيح" : "Manual excipients format incorrect");
+        return;
+      }
+      const [name, role, costStr, minStr, maxStr] = parts.map(p=>p.trim());
+      const cost = parseFloat(costStr);
+      const min = parseFloat(minStr);
+      const max = parseFloat(maxStr);
+      if(isNaN(cost) || isNaN(min) || isNaN(max)) {
+        alert(currentLang==='ar' ? "البيانات الرقمية في المواد المضافة غير صحيحة" : "Manual excipients numeric data invalid");
+        return;
+      }
+      excipients.push({name, role, cost, min, max});
+    }
+  } else {
+    excipients = generateAutoExcipients(dosageForm, formulationGoal);
   }
 
-  // Calculate batch total weight (kg)
-  const totalBatchWeightKg = (totalUnitWeight * batchSize) / 1000;
+  // تحقق من ان الكميات للنسب ممكنة و غير متساوية
+  // اذا وجدت نسب متساوية لكل المواد (نفس min = max = متساوية), اعطي تحذير
+  let allEqualPercent = excipients.every(e => e.min === e.max);
+  if(allEqualPercent && excipients.length > 1) {
+    alert(currentLang==='ar' ? "لا يمكن أن تكون نسب المواد المضافة متساوية لكل المواد" : "Excipients percentages cannot all be equal");
+    return;
+  }
 
-  // Calculate storage volume (m³) and pallets needed
-  // Assume average unit volume:
-  let unitVolumeCm3 = dosageForm === "Tablet" ? 0.5 :
-                      dosageForm === "Liquid" ? 5 :
-                      dosageForm === "Powder" ? 0.7 : 0.5;
-  const batchVolumeM3 = (unitVolumeCm3 * batchSize) / 1e6; // cm3 to m3
-  const palletVolumeM3 = 1.2; // standard pallet volume in m3
-  const palletsNeeded = Math.ceil(batchVolumeM3 / palletVolumeM3);
+  // احسب الوزن الكلي للوحدة: الوزن = المادة الفعالة + متوسط المواد المضافة
+  const avgExcipientPercentSum = excipients.reduce((sum,e) => sum + (e.min + e.max)/2, 0);
+  const totalWeightPerUnit = apiAmount / (1 - avgExcipientPercentSum/100);
 
-  // Display batch info
-  const batchInfoDiv = document.getElementById("batchInfo");
-  batchInfoDiv.innerHTML = `
-    <p><strong>Batch Size:</strong> ${batchSize.toLocaleString()} units</p>
-    <p><strong>Total Batch Weight:</strong> ${formatNumber(totalBatchWeightKg, 3)} kg</p>
-    <p><strong>Estimated Storage Volume:</strong> ${formatNumber(batchVolumeM3, 4)} m³</p>
-    <p><strong>Pallets Required for Shipping:</strong> ${palletsNeeded}</p>
-    <p><strong>Estimated Batch Cost:</strong> $${formatNumber(totalCost, 2)}</p>
-  `;
-
-  // Fill results table
-  const tbody = document.querySelector("#resultTable tbody");
-  tbody.innerHTML = "";
-  formulation.forEach(item => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${item.name}</td>
-      <td>${item.role}</td>
-      <td>${formatNumber(item.quantity, 3)}</td>
-      <td>${formatNumber(item.percentage, 2)}%</td>
-      <td>${item.cost ? "$" + formatNumber(item.cost, 2) : "-"}</td>
-    `;
-    tbody.appendChild(tr);
+  // احسب كميات المواد المضافة لكل وحدة بناء على المتوسط
+  const excipientsQuantities = excipients.map(e => {
+    const percent = (e.min + e.max)/2;
+    const quantityMg = (percent / 100) * totalWeightPerUnit;
+    return {...e, percent, quantityMg};
   });
 
-  // Show results section
-  document.getElementById("results").style.display = "block";
+  // احسب تكلفة الوحدة
+  const costApiPerKg = 100; // مثال: تكلفة المادة الفعالة $100/kg - يمكن تعديل لاحقاً
+  const apiWeightKg = apiAmount / 1_000_000;
+  const apiCostPerUnit = apiWeightKg * costApiPerKg;
 
-  // Draw pie chart
-  const ctx = document.getElementById("pieChart").getContext("2d");
-  if(window.myPieChart) window.myPieChart.destroy();
-  window.myPieChart = new Chart(ctx, {
-    type: "pie",
+  const excipientsCostPerUnit = excipientsQuantities.reduce((sum,e) => {
+    const wKg = e.quantityMg / 1_000_000;
+    return sum + wKg * e.cost;
+  },0);
+
+  const costPerUnit = apiCostPerUnit + excipientsCostPerUnit;
+  const batchWeightKg = (totalWeightPerUnit * batchSize) / 1_000_000;
+  const batchCost = costPerUnit * batchSize;
+
+  // مساحة التخزين (م3) - افتراض حجم الوحدة = الوزن بالجرام * معامل حجم (مثلاً 1 ملجم = 0.001 غرام، وحجم 1غرام= 1 سم3)
+  // لذلك الحجم لكل وحدة = totalWeightPerUnit (ملجم) * 0.001 (جم/ملجم) * 1 سم3/جم = الحجم سم3 = 1سم3=1e-6 م3
+  // نفرض كثافة 1غ/سم3 (ماء)
+  const volumePerUnitM3 = totalWeightPerUnit * 0.001 * 1e-6; // بالمتر المكعب
+  const totalVolumeM3 = volumePerUnitM3 * batchSize;
+
+  // عدد البليتات (كل بليت يحوي 10000 وحدة افتراضياً)
+  const unitsPerPallet = 10000;
+  const palletsCount = Math.ceil(batchSize / unitsPerPallet);
+
+  // بناء جدول النتائج
+  resultTableBody.innerHTML = '';
+  // اضافة المادة الفعالة أولاً
+  resultTableBody.insertAdjacentHTML('beforeend', `
+    <tr>
+      <td>${apiName}</td>
+      <td>${currentLang==='ar' ? 'مادة فعالة' : 'Active Ingredient'}</td>
+      <td>${apiAmount.toFixed(2)}</td>
+      <td>${((apiAmount/totalWeightPerUnit)*100).toFixed(2)}</td>
+      <td>${costApiPerKg.toFixed(2)}</td>
+    </tr>
+  `);
+
+  excipientsQuantities.forEach(e => {
+    resultTableBody.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td>${e.name}</td>
+        <td>${e.role}</td>
+        <td>${e.quantityMg.toFixed(2)}</td>
+        <td>${e.percent.toFixed(2)}</td>
+        <td>${e.cost.toFixed(2)}</td>
+      </tr>
+    `);
+  });
+
+  // عرض معلومات التشغيلة
+  batchInfoDiv.textContent = `${translations[currentLang].batchInfo}: ${batchSize} ${currentLang==='ar' ? 'وحدة' : 'units'}, ${totalWeightPerUnit.toFixed(2)} mg/unit, ${batchCost.toFixed(2)} $ total cost, ${totalVolumeM3.toExponential(3)} m³ volume, ${palletsCount} ${currentLang==='ar' ? 'بليت' : 'pallet(s)'}`;
+
+  // التوصيات بناء على الدواء
+  let recs = `<h3>${translations[currentLang].recommendationsTitle}</h3>`;
+  recs += `<ul>`;
+  recs += `<li><strong>${translations[currentLang].storage}:</strong> ${currentLang==='ar' ? 'احفظ في مكان بارد وجاف بعيداً عن الرطوبة والضوء المباشر.' : 'Store in cool dry place away from moisture and direct light.'}</li>`;
+  recs += `<li><strong>${translations[currentLang].manufacturing}:</strong> ${dosageForm==='Tablet' || dosageForm==='Coated Tablet' ? (currentLang==='ar' ? 'الخلط الجاف أو الحبيبات الرطبة مع الضغط المباشر.' : 'Wet granulation or direct compression.') : (currentLang==='ar' ? 'التحضير السائل مع الخلط المتجانس.' : 'Liquid preparation with uniform mixing.')}</li>`;
+  recs += `<li><strong>${translations[currentLang].packaging}:</strong> ${dosageForm==='Tablet' || dosageForm==='Coated Tablet' ? (currentLang==='ar' ? 'التغليف في بليت أو شرائط.' : 'Blister or strip packaging.') : (currentLang==='ar' ? 'تعبئة في زجاجات محكمة الإغلاق.' : 'Bottle packaging.')}</li>`;
+  recs += `<li><strong>${translations[currentLang].other}:</strong> ${currentLang==='ar' ? 'تحقق من توافق المواد المضافة مع المادة الفعالة كيميائياً وفيزيائياً.' : 'Ensure excipients compatibility with active ingredient chemically and physically.'}</li>`;
+  recs += `</ul>`;
+  recommendationsDiv.innerHTML = recs;
+
+  // رسم مخطط دائري
+  const chartLabels = [apiName, ...excipientsQuantities.map(e => e.name)];
+  const chartData = [apiAmount, ...excipientsQuantities.map(e => e.quantityMg)];
+  const chartColors = ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6c757d', '#17a2b8', '#fd7e14'];
+
+  if(pieChart) pieChart.destroy();
+  pieChart = new Chart(pieChartCanvas, {
+    type: 'pie',
     data: {
-      labels: formulation.map(f => f.name),
+      labels: chartLabels,
       datasets: [{
-        data: formulation.map(f => f.quantity),
-        backgroundColor: [
-          "#007bff", "#28a745", "#ffc107", "#dc3545", "#6f42c1", "#20c997", "#fd7e14", "#343a40"
-        ],
+        data: chartData,
+        backgroundColor: chartColors,
       }]
     },
     options: {
       responsive: true,
-      plugins: { legend: { position: 'bottom' } }
+      plugins: {
+        legend: { position: 'bottom' }
+      }
     }
   });
 
-  // Generate barcode for batch ID (random for demo)
-  const barcodeSVG = document.getElementById("barcode");
-  barcodeSVG.innerHTML = "";
-  const batchID = "CF" + Date.now();
-  JsBarcode(barcodeSVG, batchID, {
+  // توليد باركود للتشغيلة (batchSize + timestamp)
+  JsBarcode(barcodeSvg, `${batchSize}-${Date.now()}`, {
     format: "CODE128",
-    lineColor: "#0a72f7",
-    width: 2,
+    displayValue: true,
+    fontSize: 14,
     height: 50,
-    displayValue: true
   });
 
-  // Recommendations section
-  const recommendationsDiv = document.getElementById("recommendations");
-  recommendationsDiv.innerHTML = `
-    <h3>Recommendations</h3>
-    <ul>
-      <li><strong>Storage Conditions:</strong> Store in a cool, dry place (15-25°C, humidity &lt; 60%).</li>
-      <li><strong>Manufacturing Method:</strong> Follow GMP, ensure precise mixing and quality control.</li>
-      <li><strong>Packaging:</strong> Airtight blister packs for tablets; sealed bottles for liquids; protect from moisture and light.</li>
-      <li><strong>Additional:</strong> Perform stability tests regularly and monitor batch quality.</li>
-    </ul>
-  `;
+  // إظهار قسم النتائج
+  resultsSection.style.display = 'block';
+}
+
+// تغيير اللغة من السلكت
+langSelect.addEventListener('change', (e) => {
+  updateLanguage(e.target.value);
+});
+
+// تحميل الصفحة - ضبط اللغة افتراضياً
+document.addEventListener('DOMContentLoaded', () => {
+  updateLanguage(currentLang);
 });

@@ -1,73 +1,192 @@
+/* Reset and base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4f6f8;
-  margin: 0;
-  padding: 20px;
+  background: #f8f9fa;
   color: #333;
+  line-height: 1.6;
+  padding: 20px;
+  min-height: 100vh;
 }
+
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
 }
-.lang-switcher {
-  font-size: 14px;
+
+h1 {
+  font-size: 1.8rem;
+  color: #0066cc;
 }
+
+#langSwitch {
+  font-size: 1rem;
+}
+
+#langSwitch select {
+  padding: 5px 10px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
 main {
   max-width: 900px;
   margin: 0 auto;
   background: white;
-  padding: 20px;
+  padding: 25px;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
-section {
-  margin-bottom: 20px;
+
+section#inputs h2 {
+  margin-top: 20px;
+  margin-bottom: 8px;
+  color: #004080;
+  font-weight: 600;
 }
-h1, h2 {
-  margin: 0 0 10px 0;
-}
-input[type="text"], input[type="number"], select {
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
   width: 100%;
-  padding: 8px 10px;
-  margin-top: 5px;
-  box-sizing: border-box;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  transition: border-color 0.3s ease;
+  margin-bottom: 15px;
+  font-family: inherit;
 }
-button {
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+  border-color: #0066cc;
+  outline: none;
+}
+
+textarea {
+  resize: vertical;
+  font-family: monospace;
+}
+
+button#calculateBtn {
   background-color: #007bff;
-  border: none;
-  padding: 12px 20px;
   color: white;
-  font-size: 18px;
+  padding: 12px 25px;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
-  border-radius: 4px;
+  margin-top: 15px;
   transition: background-color 0.3s ease;
   width: 100%;
 }
-button:hover {
+
+button#calculateBtn:hover {
   background-color: #0056b3;
 }
-table {
+
+#manualExcipientsContainer {
+  margin-bottom: 15px;
+  background-color: #e9ecef;
+  padding: 15px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+#manualExcipientsContainer small {
+  display: block;
+  margin-top: 5px;
+  color: #333;
+}
+
+section#results {
+  margin-top: 30px;
+}
+
+#batchInfo {
+  font-weight: 600;
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+  color: #007bff;
+}
+
+table#resultTable {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 15px;
+  margin-bottom: 25px;
 }
-table, th, td {
+
+table#resultTable th,
+table#resultTable td {
+  padding: 12px 15px;
   border: 1px solid #ddd;
-}
-th, td {
-  padding: 10px;
   text-align: center;
 }
-#recommendations ul {
-  list-style-type: disc;
-  padding-left: 20px;
+
+table#resultTable th {
+  background-color: #007bff;
+  color: white;
 }
-#recommendations h3 {
-  margin-top: 30px;
-  margin-bottom: 10px;
+
+#recommendations {
+  background-color: #d9edf7;
+  border: 1px solid #bce8f1;
+  padding: 20px;
+  border-radius: 6px;
+  color: #31708f;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+canvas#pieChart {
+  display: block;
+  margin: 0 auto 20px auto;
+}
+
+svg#barcode {
+  display: block;
+  margin: 0 auto 30px auto;
+}
+
+body[dir="rtl"] {
+  direction: rtl;
+}
+
+body[dir="rtl"] header {
+  flex-direction: row-reverse;
+}
+
+body[dir="rtl"] #langSwitch label {
+  margin-left: 10px;
+  margin-right: 0;
+}
+
+body[dir="rtl"] table#resultTable th,
+body[dir="rtl"] table#resultTable td {
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  button#calculateBtn {
+    font-size: 1rem;
+  }
 }

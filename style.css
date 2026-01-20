@@ -1,42 +1,69 @@
-body {
-  font-family: Arial;
-  background: #f2f4f8;
-  padding: 20px;
-}
+document.getElementById("formulaForm").addEventListener("submit", e => {
+  e.preventDefault();
 
-h1, h2, h3 {
-  color: #0d6efd;
-  text-align: center;
-}
+  const ai = document.getElementById("aiName").value;
+  const aiMg = +document.getElementById("aiMg").value;
+  const batch = +document.getElementById("batchSize").value;
+  const weightMode = document.getElementById("weightMode").value;
+  const manualWeight = +document.getElementById("manualWeight").value;
 
-form, #results {
-  background: white;
-  padding: 20px;
-  max-width: 900px;
-  margin: auto;
-  border-radius: 8px;
-}
+  let excipients = [
+    {name:"Diluent", func:"Filler", ratio:1.2, cost:0.002},
+    {name:"Binder", func:"Binding", ratio:0.3, cost:0.004},
+    {name:"Disintegrant", func:"Disintegration", ratio:0.2, cost:0.003},
+    {name:"Lubricant", func:"Flow aid", ratio:0.05, cost:0.005}
+  ];
 
-input, select, button {
-  width: 100%;
-  margin: 8px 0;
-  padding: 8px;
-}
+  let totalMg = aiMg;
+  excipients.forEach(e => totalMg += aiMg * e.ratio);
 
-button {
-  background: #0d6efd;
-  color: white;
-  border: none;
-  font-weight: bold;
-}
+  if (weightMode === "manual" && manualWeight > totalMg) {
+    let diff = manualWeight - aiMg;
+    excipients[0].ratio = diff / aiMg;
+    totalMg = manualWeight;
+  }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
 
-th, td {
-  border: 1px solid #ccc;
-  padding: 6px;
-  text-align: center;
-}
+  let labels = [ai];
+  let values = [aiMg];
+
+  let totalCostUnit = 0;
+
+  function row(n,f,m,p,c){
+    tbody.innerHTML += `<tr><td>${n}</td><td>${f}</td><td>${m.toFixed(2)}</td><td>${p.toFixed(2)}</td><td>${c.toFixed(4)}</td></tr>`;
+  }
+
+  row(ai,"Active",aiMg,(aiMg/totalMg)*100,aiMg*0.01);
+  totalCostUnit += aiMg*0.01;
+
+  excipients.forEach(e=>{
+    let mg = aiMg * e.ratio;
+    let cost = mg * e.cost;
+    totalCostUnit += cost;
+    labels.push(e.name);
+    values.push(mg);
+    row(e.name,e.func,mg,(mg/totalMg)*100,cost);
+  });
+
+  document.getElementById("results").style.display="block";
+
+  new Chart(document.getElementById("pieChart"),{
+    type:"pie",
+    data:{labels,datasets:[{data:values}]}
+  });
+
+  document.getElementById("batchSummary").innerHTML = `
+  <p><b>Batch size:</b> ${batch} units</p>
+  <p><b>Total batch cost:</b> ${(totalCostUnit*batch).toFixed(2)} $</p>
+  <p><b>Estimated storage volume:</b> ${(batch*totalMg/1000000).toFixed(2)} m³</p>
+  `;
+
+  document.getElementById("recommendations").innerHTML = `
+  <ul>
+    <li>Store below 25°C, dry conditions</li>
+    <li>Recommended packaging: HDPE containers</li>
+    <li>Validate excipient compatibility before scale-up</li>
+  </ul>`;
+});

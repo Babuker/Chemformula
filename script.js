@@ -1,97 +1,41 @@
-let chart = null;
-
-document.addEventListener("DOMContentLoaded", () => {
-  initWeightMode();
-  document.getElementById("formulaForm")
-    .addEventListener("submit", generateFormula);
-  updateDate();
-});
-
-function initWeightMode() {
-  document.querySelectorAll("input[name='weightMode']")
-    .forEach(r => r.addEventListener("change", autoWeight));
-  document.getElementById("primaryGoal")
-    .addEventListener("change", autoWeight);
-}
-
-function autoWeight() {
-  const mode = document.querySelector("input[name='weightMode']:checked").value;
-  if (mode !== "auto") return;
-
-  const goal = document.getElementById("primaryGoal").value;
-  let w = 1000;
-
-  if (goal === "min-cost") w = 700;
-  if (goal === "balanced") w = 1000;
-  if (goal === "max-performance") w = 1200;
-
-  document.getElementById("totalWeight").value = w;
-}
-
-function generateFormula(e) {
+document.getElementById("formulaForm").addEventListener("submit", function (e) {
   e.preventDefault();
 
-  const totalWeight = +document.getElementById("totalWeight").value;
+  const aiName = document.getElementById("aiName").value;
+  const aiMg = parseFloat(document.getElementById("aiMg").value);
 
-  let items = [
-    { name: "API", percent: 50, func: "Active" },
-    { name: "MCC", percent: 30, func: "Filler" },
-    { name: "Povidone", percent: 15, func: "Binder" },
-    { name: "Mg Stearate", percent: 5, func: "Lubricant" }
+  const excipients = [
+    { name: "Diluent", mg: aiMg * 1.2 },
+    { name: "Binder", mg: aiMg * 0.3 },
+    { name: "Disintegrant", mg: aiMg * 0.2 },
+    { name: "Lubricant", mg: aiMg * 0.05 }
   ];
 
-  normalize(items);
-  renderTable(items, totalWeight);
-  renderChart(items);
-
-  document.getElementById("resultsContent").style.display = "block";
-}
-
-function normalize(list) {
-  const sum = list.reduce((a,b)=>a+b.percent,0);
-  list.forEach(i => i.percent = +(i.percent*100/sum).toFixed(2));
-}
-
-function renderTable(items, weight) {
-  const tbody = document.querySelector("#formulaTable tbody");
+  const total = aiMg + excipients.reduce((s, e) => s + e.mg, 0);
+  const tbody = document.querySelector("#resultsTable tbody");
   tbody.innerHTML = "";
 
-  items.forEach(i => {
-    tbody.innerHTML += `
-      <tr>
-        <td>${i.name}</td>
-        <td>${i.percent}% (${(i.percent/100*weight).toFixed(1)})</td>
-        <td>${i.func}</td>
-      </tr>`;
+  const components = [{ name: aiName, mg: aiMg }, ...excipients];
+
+  components.forEach(c => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${c.name}</td>
+      <td>${c.mg.toFixed(2)}</td>
+      <td>${((c.mg / total) * 100).toFixed(2)}</td>
+    `;
+    tbody.appendChild(tr);
   });
-}
 
-function renderChart(items) {
-  let canvas = document.getElementById("chart");
-  if (!canvas) {
-    canvas = document.createElement("canvas");
-    canvas.id = "chart";
-    document.getElementById("performanceMetrics").appendChild(canvas);
-  }
+  document.getElementById("results").style.display = "block";
 
-  if (chart) chart.destroy();
-
-  chart = new Chart(canvas, {
+  new Chart(document.getElementById("pieChart"), {
     type: "pie",
     data: {
-      labels: items.map(i=>i.name),
-      datasets: [{ data: items.map(i=>i.percent) }]
+      labels: components.map(c => c.name),
+      datasets: [{
+        data: components.map(c => c.mg)
+      }]
     }
   });
-}
-
-function exportResults() {
-  html2pdf().from(document.getElementById("resultsContent"))
-    .save("formula.pdf");
-}
-
-function updateDate() {
-  const d = new Date().toISOString().split("T")[0];
-  const el = document.getElementById("designDate");
-  if (el) el.textContent = d;
-}
+});

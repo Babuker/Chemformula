@@ -3,289 +3,111 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ChemFormula® | Chemical Formulation Optimizer</title>
+<title>ChemFormula® | Global Chemical Formulation Tool</title>
 
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <!-- JsBarcode CDN -->
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode/dist/JsBarcode.all.min.js"></script>
 
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 10px 20px;
-    background: #f9f9f9;
-    color: #222;
-  }
-  body.rtl {
-    direction: rtl;
-    text-align: right;
-  }
-  header {
-    margin-bottom: 20px;
-    border-bottom: 2px solid #007bff;
-    padding-bottom: 5px;
-  }
-  h1 {
-    color: #007bff;
-  }
-  label {
-    display: block;
-    margin-top: 15px;
-    font-weight: bold;
-  }
-  input[type=text], input[type=number], select, textarea {
-    width: 100%;
-    padding: 8px 6px;
-    margin-top: 5px;
-    box-sizing: border-box;
-    font-size: 1rem;
-  }
-  textarea {
-    resize: vertical;
-  }
-  button {
-    margin-top: 20px;
-    background-color: #007bff;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    font-size: 1.1rem;
-    cursor: pointer;
-    border-radius: 3px;
-  }
-  button:hover {
-    background-color: #0056b3;
-  }
-  #manualExcipientsContainer {
-    display: none;
-  }
-  #results {
-    margin-top: 30px;
-    padding: 15px;
-    background: white;
-    border-radius: 6px;
-    box-shadow: 0 0 7px rgba(0,0,0,0.1);
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-  }
-  th, td {
-    padding: 8px 10px;
-    border: 1px solid #ddd;
-  }
-  th {
-    background: #007bff;
-    color: white;
-  }
-  ul {
-    margin-top: 10px;
-  }
-  #pieChart {
-    max-width: 400px;
-    margin: 20px auto;
-  }
-  #barcode {
-    display: block;
-    margin: 20px auto;
-  }
-  #langSwitch {
-    margin-bottom: 20px;
-  }
-</style>
+<link rel="stylesheet" href="style.css" />
+
 </head>
 <body>
 
-<header>
-  <h1 id="title">ChemFormula® - Chemical Formulation Optimizer</h1>
-  <div id="langSwitch">
-    <label for="langSelect" id="langLabel">Language:</label>
-    <select id="langSelect" aria-label="Language selector">
-      <option value="en" selected>English</option>
-      <option value="ar">العربية</option>
+<select id="langSelect" title="Change Language">
+  <option value="en" selected>English</option>
+  <option value="ar">العربية</option>
+</select>
+
+<div class="container" id="app">
+
+  <header>
+    <h1 id="title">ChemFormula® - Global Chemical Formulation Tool</h1>
+  </header>
+
+  <form id="form">
+
+    <label for="apiName" id="labelApiName">Active Ingredient Name</label>
+    <input type="text" id="apiName" placeholder="Enter active ingredient name" required/>
+
+    <label for="apiAmount" id="labelApiAmount">Active Ingredient Amount (mg)</label>
+    <input type="number" id="apiAmount" placeholder="e.g. 250" min="0" step="0.01" required/>
+
+    <label for="referenceStandard" id="labelReference">Reference Standard</label>
+    <select id="referenceStandard" required>
+      <option value="USP">USP</option>
+      <option value="BP">BP</option>
+      <option value="EurPh">Eur.Ph</option>
     </select>
-  </div>
-</header>
 
-<div id="inputs">
-  <h2 id="step1Title">Step 1: Active Ingredient & Amount</h2>
-  <input type="text" id="apiName" placeholder="Active Ingredient Name" />
-  <input type="number" id="apiAmount" placeholder="Amount (mg)" min="0" step="0.01" />
+    <label for="dosageForm" id="labelDosageForm">Dosage Form</label>
+    <select id="dosageForm" required>
+      <option value="Tablet">Tablet</option>
+      <option value="Coated Tablet">Coated Tablet</option>
+      <option value="Liquid Syrup">Liquid Syrup</option>
+      <option value="Dry Syrup">Dry Syrup</option>
+      <option value="Capsule">Capsule</option>
+    </select>
 
-  <h2 id="step2Title">Step 2: Reference Standard</h2>
-  <select id="referenceStandard">
-    <option value="USP">USP</option>
-    <option value="BP">BP</option>
-    <option value="Eur.Ph">Eur.Ph</option>
-  </select>
+    <label for="formulationGoal" id="labelGoal">Formulation Goal</label>
+    <select id="formulationGoal" required>
+      <option value="Quality & Cost">Balance Quality & Cost</option>
+      <option value="Quality Only">Quality Only</option>
+      <option value="Cost Only">Cost Only</option>
+    </select>
 
-  <h2 id="step3Title">Step 3: Dosage Form</h2>
-  <select id="dosageForm">
-    <option value="Tablet">Tablet</option>
-    <option value="Coated Tablet">Coated Tablet</option>
-    <option value="Liquid Syrup">Liquid Syrup</option>
-    <option value="Dry Syrup">Dry Syrup</option>
-    <option value="Capsule">Capsule</option>
-  </select>
+    <label for="releaseMechanism" id="labelRelease">Release Mechanism</label>
+    <select id="releaseMechanism" required>
+      <option value="Immediate Release">Immediate Release</option>
+      <option value="Sustained Release">Sustained Release</option>
+      <option value="Delayed Release">Delayed Release</option>
+    </select>
 
-  <h2 id="step4Title">Step 4: Formulation Goal</h2>
-  <select id="formulationGoal">
-    <option value="Quality & Cost">Balance Quality & Cost</option>
-    <option value="Quality Only">Quality Only</option>
-    <option value="Cost Only">Cost Only</option>
-  </select>
+    <label for="excipientsMode" id="labelExcipientsMode">Excipients Selection Mode</label>
+    <select id="excipientsMode" required>
+      <option value="auto" selected>Automatic</option>
+      <option value="manual">Manual</option>
+    </select>
 
-  <h2 id="step5Title">Step 5: Release Mechanism</h2>
-  <select id="releaseMechanism">
-    <option value="Immediate Release">Immediate Release</option>
-    <option value="Sustained Release">Sustained Release</option>
-    <option value="Delayed Release">Delayed Release</option>
-  </select>
+    <div id="manualExcipientsContainer" style="display:none;">
+      <label for="manualExcipients" id="labelManualExcipients">Enter excipients manually (one per line):</label>
+      <textarea id="manualExcipients" placeholder="Name, Role, Cost per Kg, Min %, Max %"></textarea>
+    </div>
 
-  <h2 id="step6Title">Step 6: Excipients Selection Mode</h2>
-  <select id="excipientsMode">
-    <option value="auto">Automatic</option>
-    <option value="manual">Manual Input</option>
-  </select>
+    <label for="batchSize" id="labelBatchSize">Batch Size (units)</label>
+    <input type="number" id="batchSize" placeholder="e.g. 10000" min="1" required />
 
-  <div id="manualExcipientsContainer">
-    <h3 id="manualExcipientsTitle">Manual Excipients Input (one per line):</h3>
-    <textarea id="manualExcipients" placeholder="Name, Role, Cost per Kg, Min %, Max %"></textarea>
-  </div>
+    <button type="submit" id="calculateBtn">Calculate Formulation</button>
+  </form>
 
-  <h2 id="step7Title">Step 7: Batch Size</h2>
-  <input type="number" id="batchSize" placeholder="Batch Size (units)" min="1" />
+  <section id="results" style="display:none;">
+    <h2 id="resultsTitle">Results</h2>
 
-  <button id="calculateBtn">Calculate Formulation</button>
+    <div id="batchInfo"></div>
+
+    <table id="resultTable">
+      <thead>
+        <tr>
+          <th id="thName">Name</th>
+          <th id="thRole">Role</th>
+          <th id="thQuantity">Quantity (mg)</th>
+          <th id="thPercent">Percentage (%)</th>
+          <th id="thCost">Cost per Kg ($)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <canvas id="pieChart"></canvas>
+
+    <svg id="barcode"></svg>
+
+    <div id="recommendations"></div>
+  </section>
+
 </div>
-
-<div id="results" style="display:none;">
-  <h2 id="resultsTitle">Results</h2>
-
-  <div id="batchInfo"></div>
-
-  <table id="resultTable">
-    <thead>
-      <tr>
-        <th id="colName">Name</th>
-        <th id="colFunction">Function</th>
-        <th id="colQuantity">Quantity (mg)</th>
-        <th id="colPercentage">Percentage (%)</th>
-        <th id="colCost">Cost per Kg ($)</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <canvas id="pieChart"></canvas>
-
-  <svg id="barcode"></svg>
-
-  <div id="recommendations"></div>
-</div>
-
-<script>
-  const texts = {
-    en: {
-      title: "ChemFormula® - Chemical Formulation Optimizer",
-      langLabel: "Language:",
-      step1Title: "Step 1: Active Ingredient & Amount",
-      step2Title: "Step 2: Reference Standard",
-      step3Title: "Step 3: Dosage Form",
-      step4Title: "Step 4: Formulation Goal",
-      step5Title: "Step 5: Release Mechanism",
-      step6Title: "Step 6: Excipients Selection Mode",
-      manualExcipientsTitle: "Manual Excipients Input (one per line):",
-      step7Title: "Step 7: Batch Size",
-      apiNamePlaceholder: "Active Ingredient Name",
-      apiAmountPlaceholder: "Amount (mg)",
-      batchSizePlaceholder: "Batch Size (units)",
-      calculateBtn: "Calculate Formulation",
-      resultsTitle: "Results",
-      colName: "Name",
-      colFunction: "Function",
-      colQuantity: "Quantity (mg)",
-      colPercentage: "Percentage (%)",
-      colCost: "Cost per Kg ($)",
-      excipientsMode_auto: "Automatic",
-      excipientsMode_manual: "Manual Input",
-      // Add any other needed text here
-    },
-    ar: {
-      title: "كيم فورمولا® - أداة تحسين التركيبة الكيميائية",
-      langLabel: "اختر اللغة:",
-      step1Title: "الخطوة 1: المادة الفعالة وكمّيتها",
-      step2Title: "الخطوة 2: المرجع",
-      step3Title: "الخطوة 3: شكل الدواء",
-      step4Title: "الخطوة 4: هدف التركيبة",
-      step5Title: "الخطوة 5: طريقة تحرر المادة الفعالة",
-      step6Title: "الخطوة 6: اختيار المواد المضافة",
-      manualExcipientsTitle: "إدخال المواد المضافة يدويًا (كل مادة في سطر منفصل):",
-      step7Title: "الخطوة 7: حجم التشغيلة",
-      apiNamePlaceholder: "اسم المادة الفعالة",
-      apiAmountPlaceholder: "الكمية (ملج)",
-      batchSizePlaceholder: "حجم التشغيلة (وحدة)",
-      calculateBtn: "احسب التركيبة",
-      resultsTitle: "النتائج",
-      colName: "الاسم",
-      colFunction: "الوظيفة",
-      colQuantity: "الكمية (ملج)",
-      colPercentage: "النسبة المئوية (%)",
-      colCost: "التكلفة لكل كغ ($)",
-      excipientsMode_auto: "آلي",
-      excipientsMode_manual: "يدوي",
-      // Add any other needed text here
-    }
-  };
-
-  function updateLanguage(lang) {
-    document.documentElement.lang = lang;
-    if (lang === 'ar') {
-      document.body.classList.add('rtl');
-      document.body.dir = 'rtl';
-    } else {
-      document.body.classList.remove('rtl');
-      document.body.dir = 'ltr';
-    }
-    const t = texts[lang];
-    document.getElementById('title').textContent = t.title;
-    document.getElementById('langLabel').textContent = t.langLabel;
-    document.getElementById('step1Title').textContent = t.step1Title;
-    document.getElementById('step2Title').textContent = t.step2Title;
-    document.getElementById('step3Title').textContent = t.step3Title;
-    document.getElementById('step4Title').textContent = t.step4Title;
-    document.getElementById('step5Title').textContent = t.step5Title;
-    document.getElementById('step6Title').textContent = t.step6Title;
-    document.getElementById('manualExcipientsTitle').textContent = t.manualExcipientsTitle;
-    document.getElementById('step7Title').textContent = t.step7Title;
-    document.getElementById('apiName').placeholder = t.apiNamePlaceholder;
-    document.getElementById('apiAmount').placeholder = t.apiAmountPlaceholder;
-    document.getElementById('batchSize').placeholder = t.batchSizePlaceholder;
-    document.getElementById('calculateBtn').textContent = t.calculateBtn;
-    document.getElementById('resultsTitle').textContent = t.resultsTitle;
-    document.getElementById('colName').textContent = t.colName;
-    document.getElementById('colFunction').textContent = t.colFunction;
-    document.getElementById('colQuantity').textContent = t.colQuantity;
-    document.getElementById('colPercentage').textContent = t.colPercentage;
-    document.getElementById('colCost').textContent = t.colCost;
-
-    // Update excipientsMode options text
-    const excipientsMode = document.getElementById('excipientsMode');
-    excipientsMode.options[0].text = t.excipientsMode_auto;
-    excipientsMode.options[1].text = t.excipientsMode_manual;
-  }
-
-  document.getElementById('langSelect').addEventListener('change', function() {
-    updateLanguage(this.value);
-  });
-
-  // Set default language on load
-  updateLanguage('en');
-</script>
 
 <script src="script.js"></script>
-
 </body>
 </html>

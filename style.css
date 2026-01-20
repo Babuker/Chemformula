@@ -1,4 +1,4 @@
-/* Reset and base */
+/* Reset and base styles */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -7,52 +7,44 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f8f9fa;
-  color: #333;
+  background-color: #f8f9fa;
+  color: #212529;
   line-height: 1.6;
   padding: 20px;
   min-height: 100vh;
+  direction: ltr;
+  transition: direction 0.3s ease;
 }
 
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  flex-wrap: wrap;
+body[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
 }
 
-h1 {
-  font-size: 1.8rem;
-  color: #0066cc;
+h1, h2, h3 {
+  margin-bottom: 15px;
+  color: #343a40;
 }
 
-#langSwitch {
-  font-size: 1rem;
-}
-
-#langSwitch select {
-  padding: 5px 10px;
-  font-size: 1rem;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  cursor: pointer;
-}
-
-main {
+.container {
   max-width: 900px;
-  margin: 0 auto;
-  background: white;
-  padding: 25px;
+  margin: auto;
+  background: #fff;
+  padding: 25px 30px;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-section#inputs h2 {
-  margin-top: 20px;
-  margin-bottom: 8px;
-  color: #004080;
+/* Form styles */
+form {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
   font-weight: 600;
+  color: #495057;
 }
 
 input[type="text"],
@@ -60,133 +52,112 @@ input[type="number"],
 select,
 textarea {
   width: 100%;
-  padding: 10px;
-  font-size: 1rem;
-  border: 1.5px solid #ccc;
-  border-radius: 6px;
-  transition: border-color 0.3s ease;
+  padding: 10px 12px;
   margin-bottom: 15px;
-  font-family: inherit;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
 }
 
 input[type="text"]:focus,
 input[type="number"]:focus,
 select:focus,
 textarea:focus {
-  border-color: #0066cc;
   outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 3px #007bff;
 }
 
 textarea {
   resize: vertical;
-  font-family: monospace;
+  min-height: 100px;
 }
 
-button#calculateBtn {
+/* Button */
+button {
   background-color: #007bff;
   color: white;
-  padding: 12px 25px;
-  font-size: 1.2rem;
+  padding: 12px 22px;
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
+  font-size: 1.1rem;
   cursor: pointer;
-  margin-top: 15px;
   transition: background-color 0.3s ease;
-  width: 100%;
 }
 
-button#calculateBtn:hover {
+button:hover {
   background-color: #0056b3;
 }
 
-#manualExcipientsContainer {
-  margin-bottom: 15px;
-  background-color: #e9ecef;
-  padding: 15px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-#manualExcipientsContainer small {
-  display: block;
-  margin-top: 5px;
-  color: #333;
-}
-
-section#results {
+/* Results */
+#results {
   margin-top: 30px;
+  display: none;
 }
 
-#batchInfo {
-  font-weight: 600;
-  margin-bottom: 20px;
-  font-size: 1.1rem;
-  color: #007bff;
-}
-
-table#resultTable {
+table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
-table#resultTable th,
-table#resultTable td {
-  padding: 12px 15px;
-  border: 1px solid #ddd;
+table th, table td {
+  border: 1px solid #dee2e6;
+  padding: 12px 10px;
   text-align: center;
 }
 
-table#resultTable th {
-  background-color: #007bff;
-  color: white;
+table th {
+  background-color: #e9ecef;
+  font-weight: 700;
 }
 
-#recommendations {
-  background-color: #d9edf7;
-  border: 1px solid #bce8f1;
-  padding: 20px;
-  border-radius: 6px;
-  color: #31708f;
+/* Recommendations */
+#recommendations ul {
+  list-style-type: disc;
+  margin-left: 20px;
+  margin-top: 10px;
+}
+
+#recommendations ul li {
+  margin-bottom: 10px;
   font-size: 1rem;
-  line-height: 1.5;
+  color: #343a40;
 }
 
-canvas#pieChart {
+/* Language selector */
+#langSelect {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  padding: 7px 12px;
+  border-radius: 5px;
+  border: 1px solid #ced4da;
+  background: white;
+  font-size: 1rem;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+/* Barcode */
+#barcode {
+  margin-top: 15px;
   display: block;
-  margin: 0 auto 20px auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-svg#barcode {
-  display: block;
-  margin: 0 auto 30px auto;
-}
-
-body[dir="rtl"] {
-  direction: rtl;
-}
-
-body[dir="rtl"] header {
-  flex-direction: row-reverse;
-}
-
-body[dir="rtl"] #langSwitch label {
-  margin-left: 10px;
-  margin-right: 0;
-}
-
-body[dir="rtl"] table#resultTable th,
-body[dir="rtl"] table#resultTable td {
-  text-align: center;
-}
-
+/* Responsive */
 @media (max-width: 600px) {
-  header {
-    flex-direction: column;
-    align-items: flex-start;
+  .container {
+    padding: 20px 15px;
   }
-  button#calculateBtn {
-    font-size: 1rem;
+  button {
+    width: 100%;
+  }
+  #langSelect {
+    top: 10px;
+    right: 10px;
   }
 }

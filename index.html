@@ -3,96 +3,190 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ChemFormula® - Chemical Formulation Optimizer</title>
-<meta name="description" content="Professional chemical formulation optimizer." />
-<link rel="stylesheet" href="style.css" />
+<title>ChemFormula® | Chemical Formulation Optimizer</title>
+
+<!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- JsBarcode CDN -->
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode/dist/JsBarcode.all.min.js"></script>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 10px 20px;
+    background: #f9f9f9;
+    color: #222;
+  }
+  [dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+  }
+  header {
+    margin-bottom: 20px;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+  }
+  h1 {
+    color: #007bff;
+  }
+  label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+  }
+  input[type=text], input[type=number], select, textarea {
+    width: 100%;
+    padding: 8px 6px;
+    margin-top: 5px;
+    box-sizing: border-box;
+    font-size: 1rem;
+  }
+  textarea {
+    resize: vertical;
+  }
+  button {
+    margin-top: 20px;
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    border-radius: 3px;
+  }
+  button:hover {
+    background-color: #0056b3;
+  }
+  #manualExcipientsContainer {
+    display: none;
+  }
+  #results {
+    margin-top: 30px;
+    padding: 15px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 0 7px rgba(0,0,0,0.1);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+  th, td {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+  }
+  th {
+    background: #007bff;
+    color: white;
+  }
+  ul {
+    margin-top: 10px;
+  }
+  #pieChart {
+    max-width: 400px;
+    margin: 20px auto;
+  }
+  #barcode {
+    display: block;
+    margin: 20px auto;
+  }
+  #langSwitch {
+    margin-bottom: 20px;
+  }
+</style>
 </head>
 <body>
+
 <header>
   <h1>ChemFormula® - Chemical Formulation Optimizer</h1>
   <div id="langSwitch">
     <label for="langSelect">Language:</label>
     <select id="langSelect">
-      <option value="en" selected>English</option>
+      <option value="en">English</option>
       <option value="ar">العربية</option>
     </select>
   </div>
 </header>
 
-<main>
-  <section id="inputs">
-    <h2>Step 1: Active Ingredient & Amount</h2>
-    <input type="text" id="apiName" placeholder="Active Ingredient Name" />
-    <input type="number" id="apiAmount" placeholder="Amount (mg)" min="0" />
+<div id="inputs">
+  <h2>Step 1: Active Ingredient & Amount</h2>
+  <input type="text" id="apiName" placeholder="Active Ingredient Name" />
+  <input type="number" id="apiAmount" placeholder="Amount (mg)" min="0" step="0.01" />
 
-    <h2>Step 2: Reference Standard</h2>
-    <select id="referenceStandard">
-      <option value="USP">USP</option>
-      <option value="BP">BP</option>
-      <option value="EUP">EUP</option>
-    </select>
+  <h2>Step 2: Reference Standard</h2>
+  <select id="referenceStandard">
+    <option value="USP">USP</option>
+    <option value="BP">BP</option>
+    <option value="Eur.Ph">Eur.Ph</option>
+  </select>
 
-    <h2>Step 3: Dosage Form</h2>
-    <select id="dosageForm">
-      <option value="Tablet">Tablet</option>
-      <option value="Coated Tablet">Coated Tablet</option>
-      <option value="Liquid Syrup">Liquid Syrup</option>
-      <option value="Dry Syrup">Dry Syrup</option>
-      <option value="Capsule">Capsule</option>
-    </select>
+  <h2>Step 3: Dosage Form</h2>
+  <select id="dosageForm">
+    <option value="Tablet">Tablet</option>
+    <option value="Coated Tablet">Coated Tablet</option>
+    <option value="Liquid Syrup">Liquid Syrup</option>
+    <option value="Dry Syrup">Dry Syrup</option>
+    <option value="Capsule">Capsule</option>
+  </select>
 
-    <h2>Step 4: Formulation Goal</h2>
-    <select id="formulationGoal">
-      <option value="Quality & Cost">Balance Quality & Cost</option>
-      <option value="Quality Only">Quality Only</option>
-      <option value="Cost Only">Cost Only</option>
-    </select>
+  <h2>Step 4: Formulation Goal</h2>
+  <select id="formulationGoal">
+    <option value="Quality & Cost">Balance Quality & Cost</option>
+    <option value="Quality Only">Quality Only</option>
+    <option value="Cost Only">Cost Only</option>
+  </select>
 
-    <h2>Step 5: Release Mechanism</h2>
-    <select id="releaseMechanism">
-      <option value="Immediate">Immediate Release</option>
-      <option value="Sustained">Sustained Release</option>
-      <option value="Delayed">Delayed Release</option>
-    </select>
+  <h2>Step 5: Release Mechanism</h2>
+  <select id="releaseMechanism">
+    <option value="Immediate Release">Immediate Release</option>
+    <option value="Sustained Release">Sustained Release</option>
+    <option value="Delayed Release">Delayed Release</option>
+  </select>
 
-    <h2>Step 6: Excipients Selection Mode</h2>
-    <select id="excipientsMode">
-      <option value="auto" selected>Automatic</option>
-      <option value="manual">Manual</option>
-    </select>
+  <h2>Step 6: Excipients Selection Mode</h2>
+  <select id="excipientsMode">
+    <option value="auto">Automatic</option>
+    <option value="manual">Manual Input</option>
+  </select>
 
-    <div id="manualExcipientsContainer" style="display:none;">
-      <h3>Manual Excipients Input</h3>
-      <textarea id="manualExcipients" rows="5" placeholder="Enter excipients as name,role,costPerKg,minPercent,maxPercent separated by lines"></textarea>
-      <small>Example:<br>Microcrystalline Cellulose,Filler,5,2,10<br>Magnesium Stearate,Lubricant,8,0.5,2</small>
-    </div>
+  <div id="manualExcipientsContainer">
+    <h3>Manual Excipients Input (one per line):</h3>
+    <textarea id="manualExcipients" placeholder="Name, Role, Cost per Kg, Min %, Max %"></textarea>
+  </div>
 
-    <h2>Step 7: Batch Size</h2>
-    <input type="number" id="batchSize" placeholder="Number of Units" min="1" />
+  <h2>Step 7: Batch Size</h2>
+  <input type="number" id="batchSize" placeholder="Batch Size (units)" min="1" />
 
-    <button id="calculateBtn">Calculate Formulation</button>
-  </section>
+  <button id="calculateBtn">Calculate Formulation</button>
+</div>
 
-  <section id="results" style="display:none;">
-    <h2>Formulation Results</h2>
-    <div id="batchInfo"></div>
+<div id="results" style="display:none;">
+  <h2>Results</h2>
 
-    <table id="resultTable" border="1">
-      <thead>
-        <tr><th>Name</th><th>Function</th><th>Quantity (mg)</th><th>Percentage (%)</th><th>Cost per Kg ($)</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+  <div id="batchInfo"></div>
 
-    <canvas id="pieChart" style="max-width:400px; margin: 20px auto;"></canvas>
-    <svg id="barcode"></svg>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Function</th>
+        <th>Quantity (mg)</th>
+        <th>Percentage (%)</th>
+        <th>Cost per Kg ($)</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-    <div id="recommendations"></div>
-  </section>
-</main>
+  <canvas id="pieChart"></canvas>
+
+  <svg id="barcode"></svg>
+
+  <div id="recommendations"></div>
+</div>
 
 <script src="script.js"></script>
+
 </body>
 </html>

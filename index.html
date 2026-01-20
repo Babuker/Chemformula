@@ -1,74 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>ChemFormula®</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChemFormula® | Global Chemical Formulation Tool</title>
+  <meta name="description" content="Professional chemical formulation tool with auto/manual inputs, optimized batch weight and cost-quality balance." />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
-<h1>ChemFormula® – Formulation Engine</h1>
+  <h1>ChemFormula®</h1>
+  <form id="formulaForm">
 
-<form id="formulaForm">
+    <section>
+      <h2>Step 1: Active Ingredient</h2>
+      <label>API Name:
+        <input type="text" id="apiName" required placeholder="Enter active ingredient name" />
+      </label>
+      <label>API Amount (mg):
+        <input type="number" id="apiMg" required min="1" />
+      </label>
+    </section>
 
-<h3>1. Active Ingredient</h3>
-<input id="aiName" placeholder="Active Ingredient Name" required>
-<input id="aiMg" type="number" placeholder="Amount (mg/unit)" required>
+    <section>
+      <h2>Step 2: Reference Standard</h2>
+      <select id="reference">
+        <option value="USP">USP</option>
+        <option value="BP">BP</option>
+        <option value="EUP">EUP</option>
+      </select>
+    </section>
 
-<h3>2. Reference Standard</h3>
-<select id="reference">
-  <option>USP</option>
-  <option>BP</option>
-  <option>Ph.Eur</option>
-</select>
+    <section>
+      <h2>Step 3: Dosage Form</h2>
+      <select id="dosageForm">
+        <option value="Tablet">Tablet</option>
+        <option value="Liquid">Liquid</option>
+        <option value="Powder">Powder</option>
+      </select>
+    </section>
 
-<h3>3. Excipients Mode</h3>
-<select id="excipientMode">
-  <option value="auto">Automatic</option>
-  <option value="manual">Manual</option>
-</select>
+    <section>
+      <h2>Step 4: Formulation Goal</h2>
+      <select id="formGoal">
+        <option value="Balanced">Balance Quality and Cost</option>
+        <option value="Quality">Maximize Quality</option>
+        <option value="Cost">Minimize Cost</option>
+      </select>
+    </section>
 
-<h3>4. Unit Weight</h3>
-<select id="weightMode">
-  <option value="auto">Automatic</option>
-  <option value="manual">Manual</option>
-</select>
-<input id="manualWeight" type="number" placeholder="Total unit weight (mg)">
+    <section>
+      <h2>Step 5: API Release Method</h2>
+      <input type="text" id="releaseMethod" placeholder="E.g., Immediate release, Extended release" />
+    </section>
 
-<h3>5. Batch Size</h3>
-<input id="batchSize" type="number" placeholder="Number of units" required>
+    <section>
+      <h2>Step 6: Excipient Selection</h2>
+      <label>
+        <input type="radio" name="excipientMode" value="auto" checked /> Automatic
+      </label>
+      <label>
+        <input type="radio" name="excipientMode" value="manual" /> Manual
+      </label>
+    </section>
 
-<button type="submit">Generate Formula</button>
-</form>
+    <section id="manualExcipientSection" style="display:none;">
+      <label>Enter excipients (comma separated):</label>
+      <input type="text" id="manualExcipients" placeholder="e.g., Lactose, PVP, Magnesium Stearate" />
+    </section>
 
-<div id="results" style="display:none">
+    <section>
+      <h2>Step 7: Batch Size</h2>
+      <input type="number" id="batchSize" value="10000" min="1" required />
+    </section>
 
-<h2>Formulation Table</h2>
-<table>
-<thead>
-<tr>
-<th>Component</th>
-<th>Function</th>
-<th>Amount (mg)</th>
-<th>%</th>
-<th>Cost / unit ($)</th>
-</tr>
-</thead>
-<tbody id="tableBody"></tbody>
-</table>
+    <button type="submit">Generate Formula</button>
+  </form>
 
-<canvas id="pieChart"></canvas>
+  <div id="results" style="display:none;">
+    <h2>Formulation Results</h2>
 
-<h2>Batch Summary</h2>
-<div id="batchSummary"></div>
+    <table id="resultTable" border="1" width="100%">
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>Function</th>
+          <th>mg / unit</th>
+          <th>%</th>
+          <th>Cost / kg ($)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-<h2>Recommendations</h2>
-<div id="recommendations"></div>
+    <canvas id="pieChart" height="200"></canvas>
 
-</div>
+    <div id="batchInfo"></div>
+    <div id="recommendations"></div>
+  </div>
 
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

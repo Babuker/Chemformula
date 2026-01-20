@@ -1,112 +1,90 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ChemFormula® | Global Chemical Formulation Tool</title>
+  <meta charset="UTF-8" />
+  <title>ChemFormula® – Pre-Formulation Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- JsBarcode CDN -->
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode/dist/JsBarcode.all.min.js"></script>
-
-<link rel="stylesheet" href="style.css" />
-
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
 
-<select id="langSelect" title="Change Language">
-  <option value="en" selected>English</option>
-  <option value="ar">العربية</option>
-</select>
+<header>
+  <h1>ChemFormula®</h1>
+  <p>Pre-Formulation Decision Support Tool</p>
 
-<div class="container" id="app">
+  <select id="langSwitch">
+    <option value="en" selected>EN</option>
+    <option value="ar">AR</option>
+  </select>
+</header>
 
-  <header>
-    <h1 id="title">ChemFormula® - Global Chemical Formulation Tool</h1>
-  </header>
+<main>
 
-  <form id="form">
+<section class="card">
+  <h2 data-i18n="api">Active Ingredient</h2>
 
-    <label for="apiName" id="labelApiName">Active Ingredient Name</label>
-    <input type="text" id="apiName" placeholder="Enter active ingredient name" required/>
+  <label>Name</label>
+  <input id="apiName" type="text" placeholder="e.g. Paracetamol" />
 
-    <label for="apiAmount" id="labelApiAmount">Active Ingredient Amount (mg)</label>
-    <input type="number" id="apiAmount" placeholder="e.g. 250" min="0" step="0.01" required/>
+  <label>Dose per unit (mg)</label>
+  <input id="apiDose" type="number" />
 
-    <label for="referenceStandard" id="labelReference">Reference Standard</label>
-    <select id="referenceStandard" required>
-      <option value="USP">USP</option>
-      <option value="BP">BP</option>
-      <option value="EurPh">Eur.Ph</option>
-    </select>
+  <label>API cost ($ / unit)</label>
+  <input id="apiCost" type="number" />
+</section>
 
-    <label for="dosageForm" id="labelDosageForm">Dosage Form</label>
-    <select id="dosageForm" required>
-      <option value="Tablet">Tablet</option>
-      <option value="Coated Tablet">Coated Tablet</option>
-      <option value="Liquid Syrup">Liquid Syrup</option>
-      <option value="Dry Syrup">Dry Syrup</option>
-      <option value="Capsule">Capsule</option>
-    </select>
+<section class="card">
+  <h2 data-i18n="ref">Reference</h2>
+  <select id="reference">
+    <option>USP</option>
+    <option>BP</option>
+    <option>Ph.Eur</option>
+  </select>
+</section>
 
-    <label for="formulationGoal" id="labelGoal">Formulation Goal</label>
-    <select id="formulationGoal" required>
-      <option value="Quality & Cost">Balance Quality & Cost</option>
-      <option value="Quality Only">Quality Only</option>
-      <option value="Cost Only">Cost Only</option>
-    </select>
+<section class="card">
+  <h2 data-i18n="form">Dosage Form</h2>
+  <select id="dosageForm">
+    <option value="tablet">Tablet</option>
+    <option value="capsule">Capsule</option>
+    <option value="liquid">Liquid</option>
+    <option value="dry_syrup">Dry Syrup</option>
+  </select>
+</section>
 
-    <label for="releaseMechanism" id="labelRelease">Release Mechanism</label>
-    <select id="releaseMechanism" required>
-      <option value="Immediate Release">Immediate Release</option>
-      <option value="Sustained Release">Sustained Release</option>
-      <option value="Delayed Release">Delayed Release</option>
-    </select>
+<section class="card">
+  <h2 data-i18n="batch">Batch Size</h2>
+  <input id="batchSize" type="number" placeholder="Number of units" />
+</section>
 
-    <label for="excipientsMode" id="labelExcipientsMode">Excipients Selection Mode</label>
-    <select id="excipientsMode" required>
-      <option value="auto" selected>Automatic</option>
-      <option value="manual">Manual</option>
-    </select>
+<button onclick="runFormulation()">Generate Formulation</button>
 
-    <div id="manualExcipientsContainer" style="display:none;">
-      <label for="manualExcipients" id="labelManualExcipients">Enter excipients manually (one per line):</label>
-      <textarea id="manualExcipients" placeholder="Name, Role, Cost per Kg, Min %, Max %"></textarea>
-    </div>
+<section id="results" class="card hidden">
+  <h2 data-i18n="results">Results</h2>
 
-    <label for="batchSize" id="labelBatchSize">Batch Size (units)</label>
-    <input type="number" id="batchSize" placeholder="e.g. 10000" min="1" required />
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>Material</th>
+        <th>Function</th>
+        <th>mg / unit</th>
+        <th>%</th>
+        <th>Cost ($)</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-    <button type="submit" id="calculateBtn">Calculate Formulation</button>
-  </form>
+  <canvas id="pieChart"></canvas>
 
-  <section id="results" style="display:none;">
-    <h2 id="resultsTitle">Results</h2>
+  <div id="batchInfo"></div>
+  <div id="recommendations"></div>
+</section>
 
-    <div id="batchInfo"></div>
-
-    <table id="resultTable">
-      <thead>
-        <tr>
-          <th id="thName">Name</th>
-          <th id="thRole">Role</th>
-          <th id="thQuantity">Quantity (mg)</th>
-          <th id="thPercent">Percentage (%)</th>
-          <th id="thCost">Cost per Kg ($)</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-    <canvas id="pieChart"></canvas>
-
-    <svg id="barcode"></svg>
-
-    <div id="recommendations"></div>
-  </section>
-
-</div>
+</main>
 
 <script src="script.js"></script>
 </body>

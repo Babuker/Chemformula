@@ -1,254 +1,127 @@
-/* =====================================================
-   ChemFormula® – Global UI Stylesheet
-   Version: 2.0
-   ===================================================== */
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChemFormula® | Global Chemical Formulation Tool</title>
+  <meta name="description" content="Professional chemical formulation optimizer with dynamic ingredient selection, cost analysis, and batch recommendations."/>
+  <meta name="author" content="ChemFormula®"/>
+  <meta name="robots" content="index, follow"/>
 
-/* ========== CSS Reset ========== */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
 
-:root {
-  --primary: #2563eb;
-  --primary-dark: #1e40af;
-  --secondary: #64748b;
-  --success: #047857;
-  --danger: #b91c1c;
-  --bg: #f6f8fb;
-  --card: #ffffff;
-  --border: #e5e7eb;
-  --text: #1f2937;
-  --muted: #6b7280;
-  --radius: 14px;
-  --shadow: 0 12px 30px rgba(0,0,0,.08);
-}
+  <!-- Language Switch -->
+  <div class="lang-box">
+    <select id="langSelect" onchange="switchLang()">
+      <option value="en" selected>English</option>
+      <option value="ar">العربية</option>
+    </select>
+  </div>
 
-/* ========== Base ========== */
-html {
-  scroll-behavior: smooth;
-}
+  <header>
+    <h1>ChemFormula®</h1>
+    <p>Global Professional Chemical Formulation Tool</p>
+  </header>
 
-body {
-  font-family: "Segoe UI", Roboto, Arial, Helvetica, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
-}
+  <main class="container">
 
-/* ========== Header ========== */
-header {
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  color: #fff;
-  padding: 18px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: var(--shadow);
-}
+    <!-- STEP 1 -->
+    <section class="card">
+      <h2>1. Active Ingredient</h2>
+      <label for="apiName">Active Ingredient Name</label>
+      <input type="text" id="apiName" placeholder="e.g. Paracetamol" />
+      <label for="apiMg">Amount per Unit (mg)</label>
+      <input type="number" id="apiMg" min="0" step="0.01" />
+    </section>
 
-header h1 {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: .5px;
-}
+    <!-- STEP 2 -->
+    <section class="card">
+      <h2>2. Reference Standard</h2>
+      <select id="reference">
+        <option value="USP">USP</option>
+        <option value="BP">BP</option>
+        <option value="EUP">Ph. Eur.</option>
+      </select>
+    </section>
 
-header .badge {
-  background: rgba(255,255,255,.15);
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  margin-left: 8px;
-}
+    <!-- STEP 3 -->
+    <section class="card">
+      <h2>3. Dosage Form</h2>
+      <select id="dosageForm">
+        <option value="tablet">Tablet</option>
+        <option value="coatedTablet">Coated Tablet</option>
+        <option value="capsule">Capsule</option>
+        <option value="liquid">Liquid Syrup</option>
+        <option value="drySyrup">Dry Syrup</option>
+      </select>
+    </section>
 
-/* Language selector */
-header select {
-  background: rgba(255,255,255,.15);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,.3);
-  padding: 6px 10px;
-  border-radius: 10px;
-  font-weight: 600;
-}
+    <!-- STEP 4 -->
+    <section class="card">
+      <h2>4. Formulation Strategy</h2>
+      <select id="strategy">
+        <option value="balanced">Balance Quality & Cost</option>
+        <option value="quality">Quality Only</option>
+        <option value="cost">Cost Only</option>
+      </select>
+    </section>
 
-header select option {
-  color: #000;
-}
+    <!-- STEP 5 -->
+    <section class="card">
+      <h2>5. Batch Information</h2>
+      <label for="batchSize">Batch Size (units)</label>
+      <input type="number" id="batchSize" min="1" step="1" />
+    </section>
 
-/* ========== Layout ========== */
-main {
-  max-width: 1200px;
-  margin: 24px auto;
-  padding: 0 16px;
-}
+    <!-- STEP 6 -->
+    <section class="card">
+      <h2>6. Additives Selection</h2>
+      <label for="additiveMode">Additives Quantity Mode</label>
+      <select id="additiveMode">
+        <option value="auto">Automatic</option>
+        <option value="manual">Manual</option>
+      </select>
+    </section>
 
-.card {
-  background: var(--card);
-  border-radius: var(--radius);
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: var(--shadow);
-}
+    <!-- ACTION -->
+    <section class="card">
+      <button onclick="calculateFormula()">Generate Optimal Formulation</button>
+    </section>
 
-.card h2 {
-  font-size: 18px;
-  font-weight: 800;
-  margin-bottom: 14px;
-}
+    <!-- RESULTS -->
+    <section class="card" id="resultsSection" style="display:none;">
+      <h2>Formulation Results</h2>
+      <div id="resultsTable"></div>
+    </section>
 
-/* ========== Grid & Forms ========== */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 14px;
-}
+    <!-- BATCH SUMMARY -->
+    <section class="card" id="batchSummarySection" style="display:none;">
+      <h2>Batch Summary</h2>
+      <div id="batchSummary"></div>
+    </section>
 
-label {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text);
-}
+    <!-- RECOMMENDATIONS -->
+    <section class="card" id="recommendationsSection" style="display:none;">
+      <h2>Recommendations</h2>
+      <div id="recommendations"></div>
+    </section>
 
-input,
-select,
-button {
-  width: 100%;
-  margin-top: 6px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  font-size: 14px;
-}
+    <!-- CHART -->
+    <section class="card" id="chartSection" style="display:none;">
+      <h2>Composition Pie Chart</h2>
+      <canvas id="compositionChart" height="120"></canvas>
+    </section>
 
-input:focus,
-select:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
-}
+    <!-- EXPORT -->
+    <section class="card" id="exportSection" style="display:none;">
+      <button onclick="window.print()">Export Results as PDF</button>
+    </section>
 
-/* ========== Buttons ========== */
-button {
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  font-weight: 800;
-  cursor: pointer;
-  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
-}
+  </main>
 
-button:hover {
-  background: var(--primary-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0,0,0,.15);
-}
-
-button.secondary {
-  background: var(--secondary);
-}
-
-button.secondary:hover {
-  background: #475569;
-}
-
-/* ========== Table ========== */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 14px;
-}
-
-th,
-td {
-  border: 1px solid var(--border);
-  padding: 10px;
-  text-align: center;
-  font-size: 14px;
-}
-
-th {
-  background: #f1f5f9;
-  font-weight: 800;
-}
-
-tbody tr:hover {
-  background: #f8fafc;
-}
-
-/* ========== Status Messages ========== */
-.ok {
-  margin-top: 10px;
-  color: var(--success);
-  font-weight: 800;
-}
-
-.error {
-  margin-top: 10px;
-  color: var(--danger);
-  font-weight: 800;
-}
-
-/* ========== Badges & Notes ========== */
-.badge {
-  display: inline-block;
-  background: #e5f0ff;
-  color: var(--primary-dark);
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  margin-top: 8px;
-}
-
-/* ========== Chart ========== */
-canvas {
-  max-width: 520px;
-  margin: 0 auto;
-  display: block;
-}
-
-/* ========== Footer ========== */
-footer {
-  margin-top: 40px;
-  padding: 20px;
-  text-align: center;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-footer a {
-  color: var(--primary);
-  text-decoration: none;
-  font-weight: 700;
-}
-
-footer a:hover {
-  text-decoration: underline;
-}
-
-/* ========== RTL Support (Arabic) ========== */
-html[lang="ar"] body {
-  direction: rtl;
-  text-align: right;
-}
-
-html[lang="ar"] header {
-  flex-direction: row-reverse;
-}
-
-html[lang="ar"] table th,
-html[lang="ar"] table td {
-  text-align: center;
-}
-
-/* ========== Responsive ========== */
-@media (max-width: 600px) {
-  header h1 {
-    font-size: 18px;
-  }
-
-  .card {
-    padding: 16px;
-  }
-}
+  <script src="script.js"></script>
+</body>
+</html>

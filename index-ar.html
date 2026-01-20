@@ -1,148 +1,118 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ChemFormula® | أداة التشكيل الكيميائي العالمية</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>كيم فورمولا® | أداة تحسين التركيب الكيميائي</title>
 
-  <meta name="description" content="أداة احترافية لتحسين التشكيل الكيميائي بمعايير عالمية." />
-  <meta name="author" content="ChemFormula®" />
-  <meta name="robots" content="index, follow" />
+<meta name="description" content="أداة تحسين التركيب الكيميائي المهنية مع معلومات التشغيلة، دعم متعدد اللغات، وتحليل بصري." />
+<meta name="author" content="كيم فورمولا®" />
+<meta name="robots" content="index, follow" />
 
-  <link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="style.css" />
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- JsBarcode -->
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 </head>
 <body>
+<header>
+  <h1>كيم فورمولا®</h1>
+  <div class="lang-switcher">
+    <label for="langSelect">اللغة:</label>
+    <select id="langSelect">
+      <option value="ar" selected>العربية</option>
+      <option value="en">English</option>
+    </select>
+  </div>
+</header>
 
-  <header>
-    <h1>كيم فورمولا®</h1>
-    <p>أداة تحسين التشكيل الكيميائي العالمية</p>
+<main>
+  <section id="step1">
+    <h2>الخطوة 1: اسم المادة الفعالة وكمية التركيز (ملجم لكل وحدة)</h2>
+    <input type="text" id="apiName" placeholder="اسم المادة الفعالة" />
+    <input type="number" id="apiAmount" placeholder="الكمية (ملجم)" min="0" step="0.01" />
+  </section>
 
-    <div id="languageSwitcher" class="lang-switcher" style="text-align:left;">
-      <label for="langSelect">اللغة: </label>
-      <select id="langSelect">
-        <option value="ar" selected>العربية</option>
-        <option value="en">English</option>
-      </select>
-    </div>
-  </header>
+  <section id="step2">
+    <h2>الخطوة 2: المرجع القياسي</h2>
+    <select id="reference">
+      <option value="" disabled selected>اختر المرجع</option>
+      <option value="USP">USP</option>
+      <option value="BP">BP</option>
+      <option value="EUP">EUP</option>
+    </select>
+  </section>
 
-  <main>
+  <section id="step3">
+    <h2>الخطوة 3: شكل الدواء</h2>
+    <select id="dosageForm">
+      <option value="" disabled selected>اختر شكل الدواء</option>
+      <option value="Tablet">قرص</option>
+      <option value="Liquid">شراب سائل</option>
+      <option value="Powder">بودرة جافة</option>
+    </select>
+  </section>
 
-    <section id="step1" class="form-section">
-      <h2>الخطوة 1: اسم المادة الفعالة وتركيزها (ملجم)</h2>
-      <label for="apiName">اسم المادة الفعالة:</label>
-      <input type="text" id="apiName" placeholder="مثال: باراسيتامول" required />
+  <section id="step4">
+    <h2>الخطوة 4: هدف التركيبة</h2>
+    <select id="formulationGoal">
+      <option value="" disabled selected>اختر هدف التركيبة</option>
+      <option value="Balanced">توازن الجودة والتكلفة</option>
+      <option value="Quality">الجودة فقط</option>
+      <option value="Cost">التكلفة فقط</option>
+    </select>
+  </section>
 
-      <label for="apiAmount">الكمية لكل وحدة (ملجم):</label>
-      <input type="number" id="apiAmount" min="1" step="any" placeholder="مثال: 500" required />
-    </section>
+  <section id="step5">
+    <h2>الخطوة 5: طريقة تحرر المادة الفعالة</h2>
+    <select id="releaseMethod">
+      <option value="" disabled selected>اختر طريقة التحرر</option>
+      <option value="Immediate">تحرر فوري</option>
+      <option value="Sustained">تحرر مستمر</option>
+      <option value="Controlled">تحرر محكم</option>
+    </select>
+  </section>
 
-    <section id="step2" class="form-section">
-      <h2>الخطوة 2: المرجع القياسي</h2>
-      <select id="reference" required>
-        <option value="" disabled selected>اختر المرجع</option>
-        <option value="USP">USP</option>
-        <option value="BP">BP</option>
-        <option value="EUP">EUP</option>
-      </select>
-    </section>
+  <section id="step6">
+    <h2>الخطوة 6: وضع إدخال المواد المضافة</h2>
+    <select id="excipientMode">
+      <option value="auto" selected>آلي</option>
+      <option value="manual">يدوي</option>
+    </select>
+  </section>
 
-    <section id="step3" class="form-section">
-      <h2>الخطوة 3: شكل الجرعة</h2>
-      <select id="dosageForm" required>
-        <option value="" disabled selected>اختر شكل الجرعة</option>
-        <option value="Tablet">قرص</option>
-        <option value="Liquid">شراب سائل</option>
-        <option value="Powder">بودرة جافة</option>
-      </select>
-    </section>
+  <section id="step7" style="display:none;">
+    <h2>الخطوة 7: اختر المواد المضافة (الوضع اليدوي)</h2>
+    <div id="excipientCheckboxes"></div>
+  </section>
 
-    <section id="step4" class="form-section">
-      <h2>الخطوة 4: هدف التركيبة</h2>
-      <select id="formulationGoal" required>
-        <option value="" disabled selected>اختر الهدف</option>
-        <option value="Quality">الجودة</option>
-        <option value="Cost">التكلفة</option>
-        <option value="Balanced">توازن الجودة والتكلفة</option>
-      </select>
-    </section>
+  <section id="step8">
+    <h2>الخطوة 8: حجم التشغيلة (عدد الوحدات)</h2>
+    <input type="number" id="batchSize" placeholder="حجم التشغيلة" min="1" step="1" />
+  </section>
 
-    <section id="step5" class="form-section">
-      <h2>الخطوة 5: طريقة تحرير المادة الفعالة</h2>
-      <select id="releaseMethod" required>
-        <option value="" disabled selected>اختر طريقة التحرير</option>
-        <option value="Immediate">تحرير فوري</option>
-        <option value="Sustained">تحرير مطول</option>
-        <option value="Delayed">تحرير مؤجل</option>
-      </select>
-    </section>
+  <button id="generateBtn">توليد التركيبة</button>
 
-    <section id="step6" class="form-section">
-      <h2>الخطوة 6: اختيار المواد المضافة</h2>
-      <select id="excipientMode" required>
-        <option value="auto" selected>آلي</option>
-        <option value="manual">يدوي</option>
-      </select>
-    </section>
+  <section id="results" style="display:none;">
+    <h2>نتائج التركيبة</h2>
+    <div id="batchInfo"></div>
+    <table id="resultTable">
+      <thead>
+        <tr>
+          <th>الاسم</th><th>الدور</th><th>الكمية (ملجم)</th><th>% من الإجمالي</th><th>التكلفة ($/كجم)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-    <section id="step7" class="form-section" style="display:none;">
-      <h2>الخطوة 7: اختر المواد المضافة (الوضع اليدوي)</h2>
-      <div id="excipientCheckboxes">
-        <!-- يتم التوليد ديناميكيًا -->
-      </div>
-    </section>
+    <canvas id="pieChart" style="max-width: 600px; margin-top: 20px;"></canvas>
 
-    <section id="step8" class="form-section">
-      <h2>الخطوة 8: حجم التشغيلة</h2>
-      <input type="number" id="batchSize" min="1" placeholder="مثال: 10000 وحدة" required />
-    </section>
+    <svg id="barcode"></svg>
 
-    <button id="generateBtn">إنشاء التركيبة</button>
+    <div id="recommendations"></div>
+  </section>
+</main>
 
-    <section id="results" style="display:none;">
-      <h2>نتيجة التركيبة</h2>
-
-      <div id="batchInfo"></div>
-
-      <table id="resultTable" border="1" cellspacing="0" cellpadding="5">
-        <thead>
-          <tr>
-            <th>المادة</th>
-            <th>الدور</th>
-            <th>الكمية (ملجم)</th>
-            <th>النسبة (%)</th>
-            <th>التكلفة ($/كجم)</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-
-      <canvas id="pieChart" width="400" height="400"></canvas>
-
-      <svg id="barcode"></svg>
-
-      <section id="recommendations"></section>
-    </section>
-
-  </main>
-
-  <script src="script.js"></script>
-
-  <script>
-    // تبديل اللغة
-    document.getElementById("langSelect").addEventListener("change", (e) => {
-      if (e.target.value === "en") {
-        window.location.href = "index.html";
-      } else {
-        window.location.href = "index-ar.html";
-      }
-    });
-  </script>
-
+<script src="script.js"></script>
 </body>
 </html>

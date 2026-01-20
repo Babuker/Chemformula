@@ -1,120 +1,82 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>برنامج تصميم التركيبة الكيميائية</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChemFormula® | أداة التركيبات الدوائية</title>
 
-<!-- Icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-<!-- CSS -->
-<link rel="stylesheet" href="style.css">
-
-<!-- Charts & PDF -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-<style>
-body { font-family: Arial, sans-serif; background:#f7f7fb; }
-header { background:#3949ab;color:#fff;padding:15px; }
-.container { max-width:1200px;margin:auto;padding:20px; }
-.section { background:#fff;padding:20px;border-radius:8px;margin-bottom:20px; }
-label { font-weight:600; }
-input, select, textarea { width:100%; padding:8px; margin-top:5px; }
-button { background:#3949ab;color:#fff;border:none;padding:10px 15px;cursor:pointer }
-table { width:100%;border-collapse:collapse;margin-top:15px }
-th,td { border:1px solid #ddd;padding:8px;text-align:center }
-</style>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
 
-<header>
-  <h1><i class="fas fa-atom"></i> برنامج تصميم التركيبة الكيميائية</h1>
-  <button onclick="switchLang('en')" style="float:left;background:#fff;color:#3949ab">EN</button>
-</header>
-
-<div class="container">
-
-<!-- FORM -->
-<section class="section">
-<h2><i class="fas fa-sliders-h"></i> إعدادات التصميم</h2>
+<h1>كيم فورمولا</h1>
 
 <form id="formulaForm">
 
-<label>الهدف الأساسي</label>
-<select id="primaryGoal">
-  <option value="min-cost">أقل تكلفة</option>
-  <option value="balanced" selected>توازن تكلفة / جودة</option>
-  <option value="max-performance">أعلى أداء</option>
-  <option value="fast-production">سرعة إنتاج</option>
-  <option value="eco-friendly">صديق للبيئة</option>
-</select>
+  <div class="step">
+    <label>اسم المادة الفعالة</label>
+    <input type="text" id="aiName" required>
 
-<hr>
+    <label>التركيز (ملغ لكل وحدة)</label>
+    <input type="number" id="aiMg" required>
+  </div>
 
-<label><i class="fas fa-weight"></i> وزن الوحدة</label><br>
-<label><input type="radio" name="weightMode" value="manual" checked> يدوي</label>
-<label style="margin-right:15px">
-  <input type="radio" name="weightMode" value="auto"> آلي (مرتبط بالهدف)
-</label>
+  <div class="step">
+    <label>الدستور المرجعي</label>
+    <select id="standard">
+      <option>USP</option>
+      <option>BP</option>
+    </select>
+  </div>
 
-<input type="number" id="totalWeight" value="1000" min="100" step="10">
+  <div class="step">
+    <label>الشكل الدوائي</label>
+    <select id="dosage">
+      <option>قرص</option>
+      <option>شراب</option>
+      <option>بودرة جافة</option>
+    </select>
+  </div>
 
-<small id="autoWeightHint" style="display:none;color:#388e3c">
-  يتم حساب الوزن تلقائيًا حسب الهدف الأساسي
-</small>
+  <div class="step">
+    <label>أساس بناء التركيبة</label>
+    <select id="basis">
+      <option>توازن الجودة والتكلفة</option>
+      <option>الجودة فقط</option>
+      <option>التكلفة فقط</option>
+    </select>
+  </div>
 
-<hr>
+  <div class="step">
+    <label>طريقة تحرر المادة الفعالة</label>
+    <select id="release">
+      <option>تحرر فوري</option>
+      <option>تحرر معدل</option>
+      <option>تحرر ممتد</option>
+    </select>
+  </div>
 
-<button type="submit">
-  <i class="fas fa-calculator"></i> تصميم التركيبة
-</button>
-
+  <button type="submit">إنشاء التركيبة</button>
 </form>
-</section>
 
-<!-- RESULTS -->
-<section class="section" id="resultsContent" style="display:none">
+<div id="results" style="display:none">
+  <h2>التركيبة المثالية</h2>
 
-<h2><i class="fas fa-chart-pie"></i> النتائج</h2>
+  <table id="resultsTable">
+    <thead>
+      <tr>
+        <th>المكون</th>
+        <th>الكمية (ملغ)</th>
+        <th>النسبة %</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-<p>
-<i class="fas fa-calendar"></i>
-تاريخ التصميم: <strong><span id="designDate"></span></strong>
-</p>
-
-<table id="formulaTable">
-<thead>
-<tr>
-  <th>المادة</th>
-  <th>النسبة / الكمية</th>
-  <th>الوظيفة</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-
-<div id="performanceMetrics" style="margin-top:20px"></div>
-
-<div style="margin-top:20px">
-<button onclick="exportResults()">
-  <i class="fas fa-file-pdf"></i> تصدير PDF
-</button>
+  <canvas id="pieChart"></canvas>
 </div>
 
-</section>
-
-</div>
-
-<footer style="text-align:center;padding:15px;color:#666">
-© 2026 – برنامج تصميم التركيبة الكيميائية
-</footer>
-
-<!-- JS -->
-<script src="i18n.js"></script>
 <script src="script.js"></script>
-
 </body>
 </html>

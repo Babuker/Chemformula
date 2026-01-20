@@ -1,69 +1,89 @@
-document.getElementById("formulaForm").addEventListener("submit", e => {
-  e.preventDefault();
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 900px;
+  margin: 1rem auto;
+  background: #f4f6f8;
+  color: #222;
+  padding: 1rem;
+  line-height: 1.5;
+}
 
-  const ai = document.getElementById("aiName").value;
-  const aiMg = +document.getElementById("aiMg").value;
-  const batch = +document.getElementById("batchSize").value;
-  const weightMode = document.getElementById("weightMode").value;
-  const manualWeight = +document.getElementById("manualWeight").value;
+h1 {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #0b4a6f;
+}
 
-  let excipients = [
-    {name:"Diluent", func:"Filler", ratio:1.2, cost:0.002},
-    {name:"Binder", func:"Binding", ratio:0.3, cost:0.004},
-    {name:"Disintegrant", func:"Disintegration", ratio:0.2, cost:0.003},
-    {name:"Lubricant", func:"Flow aid", ratio:0.05, cost:0.005}
-  ];
+form section {
+  background: #fff;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.1);
+}
 
-  let totalMg = aiMg;
-  excipients.forEach(e => totalMg += aiMg * e.ratio);
+form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
 
-  if (weightMode === "manual" && manualWeight > totalMg) {
-    let diff = manualWeight - aiMg;
-    excipients[0].ratio = diff / aiMg;
-    totalMg = manualWeight;
-  }
+input[type="text"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
 
-  const tbody = document.getElementById("tableBody");
-  tbody.innerHTML = "";
+input[type="radio"] {
+  margin-right: 0.3rem;
+}
 
-  let labels = [ai];
-  let values = [aiMg];
+button[type="submit"] {
+  width: 100%;
+  padding: 0.8rem;
+  font-size: 1.1rem;
+  background: #0b4a6f;
+  border: none;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 0.5rem;
+}
 
-  let totalCostUnit = 0;
+button[type="submit"]:hover {
+  background: #07415a;
+}
 
-  function row(n,f,m,p,c){
-    tbody.innerHTML += `<tr><td>${n}</td><td>${f}</td><td>${m.toFixed(2)}</td><td>${p.toFixed(2)}</td><td>${c.toFixed(4)}</td></tr>`;
-  }
+#results {
+  margin-top: 2rem;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 5px rgb(0 0 0 / 0.1);
+}
 
-  row(ai,"Active",aiMg,(aiMg/totalMg)*100,aiMg*0.01);
-  totalCostUnit += aiMg*0.01;
+table {
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
 
-  excipients.forEach(e=>{
-    let mg = aiMg * e.ratio;
-    let cost = mg * e.cost;
-    totalCostUnit += cost;
-    labels.push(e.name);
-    values.push(mg);
-    row(e.name,e.func,mg,(mg/totalMg)*100,cost);
-  });
+th, td {
+  padding: 0.5rem 0.8rem;
+  text-align: center;
+}
 
-  document.getElementById("results").style.display="block";
+th {
+  background: #0b4a6f;
+  color: #fff;
+}
 
-  new Chart(document.getElementById("pieChart"),{
-    type:"pie",
-    data:{labels,datasets:[{data:values}]}
-  });
-
-  document.getElementById("batchSummary").innerHTML = `
-  <p><b>Batch size:</b> ${batch} units</p>
-  <p><b>Total batch cost:</b> ${(totalCostUnit*batch).toFixed(2)} $</p>
-  <p><b>Estimated storage volume:</b> ${(batch*totalMg/1000000).toFixed(2)} m³</p>
-  `;
-
-  document.getElementById("recommendations").innerHTML = `
-  <ul>
-    <li>Store below 25°C, dry conditions</li>
-    <li>Recommended packaging: HDPE containers</li>
-    <li>Validate excipient compatibility before scale-up</li>
-  </ul>`;
-});
+canvas {
+  margin-top: 1rem;
+  max-width: 100%;
+}

@@ -1,74 +1,98 @@
+/* Reset & base */
+* {
+  box-sizing: border-box;
+}
 body {
-  font-family: Arial, sans-serif;
-  background: #f5f7fa;
-  margin: 0;
-  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0; padding: 0;
+  background: #f5f8fa;
+  color: #333;
+  line-height: 1.6;
+  transition: background-color 0.3s, color 0.3s;
 }
-
-header {
-  background: #1e2a38;
-  color: #fff;
-  padding: 15px;
-  text-align: center;
-}
-
 .container {
-  max-width: 1100px;
-  margin: auto;
-  padding: 20px;
+  max-width: 900px;
+  margin: 1.5rem auto;
+  padding: 0 1rem;
 }
-
-.card {
-  background: #fff;
-  padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-
-label {
-  font-weight: bold;
-  display: block;
-  margin-top: 10px;
-}
-
-input, select, button {
-  width: 100%;
-  padding: 8px;
-  margin-top: 5px;
-}
-
-button {
-  background: #0066cc;
-  color: #fff;
-  border: none;
-  margin-top: 20px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #004c99;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-}
-
-table th, table td {
-  border: 1px solid #ccc;
-  padding: 8px;
+header {
   text-align: center;
+  margin-bottom: 1.5rem;
 }
-
-table th {
-  background: #eef2f7;
+h1 {
+  margin-bottom: 0.2rem;
 }
-
-/* Language Switch */
+h2 {
+  margin-top: 0; margin-bottom: 0.75rem;
+}
+.card {
+  background: white;
+  padding: 1.25rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgb(0 0 0 / 0.05);
+  margin-bottom: 1.5rem;
+}
+input[type=text], input[type=number], select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+input[type=text]:focus, input[type=number]:focus, select:focus {
+  border-color: #007bff;
+  outline: none;
+}
+button {
+  background-color: #007bff;
+  border: none;
+  color: white;
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.25s;
+  width: 100%;
+}
+button:hover {
+  background-color: #0056b3;
+}
 .lang-box {
   position: fixed;
   top: 10px;
   right: 10px;
+  z-index: 9999;
+}
+.lang-box select {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.9rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+#resultsTable, #batchSummary, #recommendations {
+  margin-top: 1rem;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+table th, table td {
+  border: 1px solid #ddd;
+  padding: 0.6rem;
+  text-align: center;
+}
+table th {
+  background-color: #f0f0f0;
+}
+@media (max-width: 600px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+  button {
+    font-size: 0.9rem;
+  }
 }

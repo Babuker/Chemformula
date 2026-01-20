@@ -1,62 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Chemical Formula Optimizer</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChemFormula® | Global Chemical Formulation Tool</title>
 
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta name="description" content="Professional chemical formulation optimizer">
+  <link rel="stylesheet" href="style.css">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- Chart.js CDN (GitHub Pages compatible) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
-<header>
-  <h1>Chemical Formula Optimizer</h1>
-  <button onclick="switchLang('ar')">AR</button>
-</header>
 
-<main>
+<h1>ChemFormula®</h1>
+
 <form id="formulaForm">
 
-<label>Primary Goal</label>
-<select id="primaryGoal">
-  <option value="min-cost">Min Cost</option>
-  <option value="balanced" selected>Balanced</option>
-  <option value="max-performance">Max Performance</option>
-</select>
+  <div class="step">
+    <label>Active Ingredient Name</label>
+    <input type="text" id="aiName" required>
 
-<hr>
+    <label>Concentration (mg per unit)</label>
+    <input type="number" id="aiMg" required>
+  </div>
 
-<label>Unit Weight</label><br>
-<label><input type="radio" name="weightMode" value="manual" checked> Manual</label>
-<label><input type="radio" name="weightMode" value="auto"> Automatic</label>
+  <div class="step">
+    <label>Reference Standard</label>
+    <select id="standard">
+      <option>USP</option>
+      <option>BP</option>
+    </select>
+  </div>
 
-<input type="number" id="totalWeight" value="1000">
+  <div class="step">
+    <label>Dosage Form</label>
+    <select id="dosage">
+      <option>Tablet</option>
+      <option>Liquid</option>
+      <option>Dry Powder</option>
+    </select>
+  </div>
 
-<button type="submit">Generate Formula</button>
+  <div class="step">
+    <label>Formulation Basis</label>
+    <select id="basis">
+      <option>Quality & Cost Balance</option>
+      <option>Quality Only</option>
+      <option>Cost Only</option>
+    </select>
+  </div>
+
+  <div class="step">
+    <label>Drug Release Type</label>
+    <select id="release">
+      <option>Immediate Release</option>
+      <option>Modified Release</option>
+      <option>Extended Release</option>
+    </select>
+  </div>
+
+  <button type="submit">Generate Formula</button>
 </form>
 
-<section id="resultsContent" style="display:none">
-<h2>Results</h2>
-<p>Date: <span id="designDate"></span></p>
+<div id="results" style="display:none">
+  <h2>Optimized Formula</h2>
 
-<table id="formulaTable">
-<thead>
-<tr><th>Material</th><th>Amount</th><th>Function</th></tr>
-</thead>
-<tbody></tbody>
-</table>
+  <table id="resultsTable">
+    <thead>
+      <tr>
+        <th>Component</th>
+        <th>Amount (mg)</th>
+        <th>Percentage (%)</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-<div id="performanceMetrics"></div>
+  <canvas id="pieChart"></canvas>
+</div>
 
-<button onclick="exportResults()">Export PDF</button>
-</section>
-</main>
-
-<script src="i18n.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

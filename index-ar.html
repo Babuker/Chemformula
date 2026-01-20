@@ -1,74 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>ChemFormula®</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChemFormula® | أداة تركيب كيميائي عالمية</title>
+  <meta name="description" content="أداة تركيب كيميائي احترافية بدقة 100% مع مدخلات يدوية وآلية، وحساب الوزن الأمثل للتشغيلة، وتحقيق توازن الجودة والتكلفة." />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
-<h1>ChemFormula® – Formulation Engine</h1>
+  <h1>كيم فورمولا®</h1>
+  <form id="formulaForm">
 
-<form id="formulaForm">
+    <section>
+      <h2>الخطوة 1: المادة الفعالة</h2>
+      <label>اسم المادة الفعالة:
+        <input type="text" id="apiName" required placeholder="أدخل اسم المادة الفعالة" />
+      </label>
+      <label>كمية المادة الفعالة (ملجم):
+        <input type="number" id="apiMg" required min="1" />
+      </label>
+    </section>
 
-<h3>1. Active Ingredient</h3>
-<input id="aiName" placeholder="Active Ingredient Name" required>
-<input id="aiMg" type="number" placeholder="Amount (mg/unit)" required>
+    <section>
+      <h2>الخطوة 2: المرجع الدستوري</h2>
+      <select id="reference">
+        <option value="USP">USP</option>
+        <option value="BP">BP</option>
+        <option value="EUP">EUP</option>
+      </select>
+    </section>
 
-<h3>2. Reference Standard</h3>
-<select id="reference">
-  <option>USP</option>
-  <option>BP</option>
-  <option>Ph.Eur</option>
-</select>
+    <section>
+      <h2>الخطوة 3: شكل الجرعة</h2>
+      <select id="dosageForm">
+        <option value="Tablet">قرص</option>
+        <option value="Liquid">شراب سائل</option>
+        <option value="Powder">بودرة</option>
+      </select>
+    </section>
 
-<h3>3. Excipients Mode</h3>
-<select id="excipientMode">
-  <option value="auto">Automatic</option>
-  <option value="manual">Manual</option>
-</select>
+    <section>
+      <h2>الخطوة 4: هدف التركيبة</h2>
+      <select id="formGoal">
+        <option value="Balanced">توازن الجودة والتكلفة</option>
+        <option value="Quality">الجودة فقط</option>
+        <option value="Cost">التكلفة فقط</option>
+      </select>
+    </section>
 
-<h3>4. Unit Weight</h3>
-<select id="weightMode">
-  <option value="auto">Automatic</option>
-  <option value="manual">Manual</option>
-</select>
-<input id="manualWeight" type="number" placeholder="Total unit weight (mg)">
+    <section>
+      <h2>الخطوة 5: طريقة تحرير المادة الفعالة</h2>
+      <input type="text" id="releaseMethod" placeholder="مثال: تحرير سريع، تحرير ممتد" />
+    </section>
 
-<h3>5. Batch Size</h3>
-<input id="batchSize" type="number" placeholder="Number of units" required>
+    <section>
+      <h2>الخطوة 6: اختيار المواد المضافة</h2>
+      <label>
+        <input type="radio" name="excipientMode" value="auto" checked /> تلقائي
+      </label>
+      <label>
+        <input type="radio" name="excipientMode" value="manual" /> يدوي
+      </label>
+    </section>
 
-<button type="submit">Generate Formula</button>
-</form>
+    <section id="manualExcipientSection" style="display:none;">
+      <label>أدخل المواد المضافة (مفصولة بفواصل):</label>
+      <input type="text" id="manualExcipients" placeholder="مثال: لاكتوز، PVP، ستيرات المغنيسيوم" />
+    </section>
 
-<div id="results" style="display:none">
+    <section>
+      <h2>الخطوة 7: حجم التشغيلة</h2>
+      <input type="number" id="batchSize" value="10000" min="1" required />
+    </section>
 
-<h2>Formulation Table</h2>
-<table>
-<thead>
-<tr>
-<th>Component</th>
-<th>Function</th>
-<th>Amount (mg)</th>
-<th>%</th>
-<th>Cost / unit ($)</th>
-</tr>
-</thead>
-<tbody id="tableBody"></tbody>
-</table>
+    <button type="submit">إنشاء التركيبة</button>
+  </form>
 
-<canvas id="pieChart"></canvas>
+  <div id="results" style="display:none;">
+    <h2>نتائج التركيبة</h2>
 
-<h2>Batch Summary</h2>
-<div id="batchSummary"></div>
+    <table id="resultTable" border="1" width="100%">
+      <thead>
+        <tr>
+          <th>المكون</th>
+          <th>الوظيفة</th>
+          <th>ملجم / وحدة</th>
+          <th>%</th>
+          <th>التكلفة / كجم ($)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-<h2>Recommendations</h2>
-<div id="recommendations"></div>
+    <canvas id="pieChart" height="200"></canvas>
 
-</div>
+    <div id="batchInfo"></div>
+    <div id="recommendations"></div>
+  </div>
 
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
